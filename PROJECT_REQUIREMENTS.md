@@ -92,12 +92,12 @@ Optionally, add an AI chatbot to help quickly find information by answering ques
 ### Day 1: Foundation & Security (Phase 1)
 **Focus:** Infrastructure setup, Database Design, and Authentication.
 - **Tasks:**
-  - Verify and finalize Docker setup for PostgreSQL and MinIO (Completed).
-  - Setup Spring Boot project structure (Packages: `config`, `controller`, `service`, `repository`, `model`, `security`).
-  - Database schema design for Users and Roles.
-  - Implement Spring Security with JWT (JSON Web Tokens).
-  - Build Auth APIs: `/api/auth/register`, `/api/auth/login`.
-  - Configure Swagger/OpenAPI for API documentation testing.
+  - [x] Verify and finalize Docker setup for PostgreSQL and MinIO (Completed).
+  - [x] Setup Spring Boot project structure (Packages: `config`, `controller`, `service`, `repository`, `entity`, `security`, `dto`).
+  - [x] Database schema design for Users and Roles (User Entity).
+  - [x] Implement Spring Security with JWT (JSON Web Tokens).
+  - [x] Build Auth APIs: `/api/auth/register`, `/api/auth/login`.
+  - [x] Configure Swagger/OpenAPI for API documentation testing.
 
 ### Day 2: Core Domain - Projects & Members (Phase 2)
 **Focus:** Project management and Role-based access control.
