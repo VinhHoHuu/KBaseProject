@@ -1,0 +1,41 @@
+name: Java CI with Maven
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    # Cấu hình Database cho môi trường CI vì code cần DB để chạy Test
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: kbasedb
+          POSTGRES_USER: kbaseuser
+          POSTGRES_PASSWORD: kbasepassword
+        ports:
+          - 5433:5432 # Map cổng 5432 của Container ra 5433 của máy ảo (khớp với application.properties)
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - name: Checkout Source Code
+      uses: actions/checkout@v4
+    
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: maven
+        
+    - name: Build and Test with Maven
+      run: mvn clean package
