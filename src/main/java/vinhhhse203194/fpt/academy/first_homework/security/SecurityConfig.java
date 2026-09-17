@@ -24,6 +24,9 @@ public class SecurityConfig {
     @Autowired
     private JwtFilter jwtFilter;
 
+    @Autowired
+    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+
     // Quy định dùng bộ mã hoá BCrypt cho mật khẩu (Băm mật khẩu ra thành chuỗi lằng nhằng để chống hack)
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -48,9 +51,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable()) // Tắt CSRF vì chúng ta làm API (không làm form HTML truyền thống)
+            .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint)) // Tuỳ biến lỗi 401
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Không lưu phiên đăng nhập (Stateless)
             .authorizeHttpRequests(auth -> 
-                auth.requestMatchers("/api/auth/**").permitAll() // LUẬT 1: Đường này (/api/auth) là để Đăng nhập/Đăng ký nên THẢ CỬA (Ai cũng vào được)
+                auth.requestMatchers("/api/auth/**", "/error").permitAll() // LUẬT 1: Đường này (/api/auth) là để Đăng nhập/Đăng ký nên THẢ CỬA. "/error" để hiển thị lỗi gốc.
                     .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll() // Mở cửa cho Swagger
                     .anyRequest().authenticated() // LUẬT 2: Toàn bộ các đường khác bắt buộc phải TRÌNH THẺ
             );
