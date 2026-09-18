@@ -7,6 +7,7 @@
     <img src="https://img.shields.io/badge/Java-21-orange?style=for-the-badge&logo=java" alt="Java 21">
     <img src="https://img.shields.io/badge/Spring_Boot-3.4.0-brightgreen?style=for-the-badge&logo=spring" alt="Spring Boot">
     <img src="https://img.shields.io/badge/PostgreSQL-15-blue?style=for-the-badge&logo=postgresql" alt="PostgreSQL">
+    <img src="https://img.shields.io/badge/MinIO-S3_Storage-red?style=for-the-badge&logo=minio" alt="MinIO">
     <img src="https://img.shields.io/badge/Security-JWT-red?style=for-the-badge&logo=springsecurity" alt="JWT Security">
     <img src="https://img.shields.io/badge/CI/CD-GitHub_Actions-black?style=for-the-badge&logo=githubactions" alt="GitHub Actions">
   </p>
@@ -38,6 +39,15 @@
 - **Xem danh sách thành viên** của dự án (yêu cầu là thành viên).
 - **Trục xuất thành viên** (chỉ dành cho `OWNER` hoặc `ADMIN`).
 
+### 📂 4. Quản lý Tài liệu & Lưu trữ (Document Storage)
+- Tích hợp hệ thống lưu trữ đối tượng **MinIO** (chuẩn S3).
+- **Trang quản trị MinIO:** `http://localhost:9001` (Tài khoản: `minioadmin` / `minioadmin`)
+- **Cách kiểm tra file sau khi Upload:** 
+  1. Đăng nhập vào trang quản trị MinIO.
+  2. Chọn mục **Buckets** bên menu trái.
+  3. Chọn bucket **`kbase-files`** -> Mở tab **Object Browser**. Bạn sẽ thấy file vật lý được lưu trữ ở đây.
+  4. Thông tin file (tên gốc, size, người up) được lưu đồng thời trong bảng `documents` của PostgreSQL.
+
 ---
 
 ## 🚀 Hướng dẫn cài đặt (Getting Started)
@@ -45,7 +55,7 @@
 ### Yêu cầu hệ thống (Prerequisites)
 - **Java 21** (JDK 21)
 - **Maven** 3.8+
-- **PostgreSQL** 15+
+- **Docker & Docker Compose** (Để chạy PostgreSQL và MinIO)
 
 ### Các bước cài đặt (Installation)
 1. **Clone dự án:**
@@ -54,10 +64,13 @@
    cd KBaseProject
    ```
 
-2. **Cấu hình Database:**
-   Tạo một database trong PostgreSQL mang tên `kbasedb`. Sau đó mở file `src/main/resources/application.properties` để điều chỉnh `username` và `password` cho khớp với máy của bạn.
+2. **Khởi động Database và MinIO:**
+   Cài đặt Docker Desktop và chạy lệnh sau để khởi động PostgreSQL & MinIO:
+   ```bash
+   docker-compose up -d
+   ```
 
-3. **Chạy ứng dụng:**
+3. **Chạy ứng dụng Spring Boot:**
    ```bash
    mvn spring-boot:run
    ```
