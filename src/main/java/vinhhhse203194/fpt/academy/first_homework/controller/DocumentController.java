@@ -31,10 +31,38 @@ public class DocumentController {
         
         try {
             User currentUser = userDetails.getUser();
-            // Gọi hàm uploadDocument từ service mà bạn vừa viết
             DocumentResponse response = documentService.uploadDocument(file, projectId, currentUser);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @GetMapping
+    @Operation(summary = "Lấy danh sách File", description = "Xem tất cả các file đã upload trong dự án.")
+    public ResponseEntity<?> getAllDocuments(
+            @PathVariable Long projectId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
             
+        try {
+            User currentUser = userDetails.getUser();
+            return ResponseEntity.ok(documentService.getAllDocuments(projectId, currentUser));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{documentId}")
+    @Operation(summary = "Xóa File", description = "Xóa file khỏi dự án. Chỉ Owner hoặc người upload mới được xóa.")
+    public ResponseEntity<?> deleteDocument(
+            @PathVariable Long projectId,
+            @PathVariable Long documentId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+            
+        try {
+            User currentUser = userDetails.getUser();
+            documentService.deleteDocument(projectId, currentUser, documentId);
+            return ResponseEntity.ok("Xóa file thành công!");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }

@@ -6,6 +6,7 @@ import vinhhhse203194.fpt.academy.first_homework.dto.DocumentResponse;
 import vinhhhse203194.fpt.academy.first_homework.entity.*;
 import vinhhhse203194.fpt.academy.first_homework.repository.IDocumentRepository;
 import vinhhhse203194.fpt.academy.first_homework.repository.IProjectRepository;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -85,6 +86,70 @@ public class DocumentService {
         return new DocumentResponse(document, presignedUrl);
     }
 
+    //Lấy danh sách toàn bộ file của 1 project
+    public List<DocumentResponse> getAllDocuments(Long projectId,User currentUser)
+            throws Exception{
+        //bước 1: kiểm tra xem dự án có tồn tại hay ko
+        Project project = projectRepository.findById(projectId)
+            .orElseThrow(()-> new RuntimeException("Project not found!"));
+        
+        //Bước 2: kiểm tra quyền truy cập(phải là member mới được xem)
+        boolean isOwner = project.getOwner().getId().equals(currentUser.getId());
+        boolean isMember = project.getProjectMembers().stream().
+                anyMatch(pm -> pm.getUser().getId().equals(currentUser.getId()));
+        
+        if(!isOwner && !isMember){
+            throw new RuntimeException("You are not a member of this project!");
+        }
+
+        //Bước 3: lấy toàn bộ document từ database dựa vào projectId
+        List<Document> documents = documentRepository.findByProjectId(projectId);
+
+        //Bước 4: chuyển đổi từ entity sang DTO và tạo Presigned url mới cho mỗi file
+        List<DocumentResponse> responses = new ArrayList<>();
+        for(Document doc : documents){
+            String presignedUrl = minioService.getPresignedUrl(doc.getFileKey());
+            responses.add(new DocumentResponse(doc, presignedUrl));
+        }
+
+        return responses;    
+    }
+
+    //Xóa một file
+    public void deleteDocument(Long projectId, User currentUser, Long documentId) 
+            throws Exception{
+        //Bước 1: kiểm tra xem dự án có tồn tại hay ko
+        Project project = projectRepository.findById(projectId)
+            .orElseThrow(() -> new RuntimeException("Project not found!"));
+
+        //Bước 2: Kiểm tra xem user hiện tại có quyền xóa file ko
+        boolean isOwner = project.getOwner().getId().equals(currentUser.getId());
+        boolean isMember = project.getProjectMembers().stream().
+                anyMatch(pm -> pm.getUser().getId().equals(currentUser.getId()));
+        
+        if(!isOwner && !isMember){
+            throw new RuntimeException("You are not a member of this project!");
+        }
+
+        //Bước 3: Tìm document trong database
+        Document document = documentRepository.findById(documentId)
+                .orElseThrow(() -> new RuntimeException("Document not found!"));
+
+        //Bước 4: Kiểm tra xem document có thuộc về project hay ko
+        if(!document.getProject().getId().equals(projectId)){
+            throw new RuntimeException("Document not found in this project!");
+        }
+
+        //Bước 5: Xóa file khỏi MinIO
+        try{
+            minioService.deleteFile(document.getFileKey());
+        }catch(Exception e){
+            throw new RuntimeException("Failed to delete file from MinIO: " + e.getMessage());
+        }
+
+        //Bước 6: Xóa document khỏi database
+        documentRepository.delete(document);
+    }
+
     
-    //
 }

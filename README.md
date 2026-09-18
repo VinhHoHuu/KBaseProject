@@ -91,4 +91,12 @@ Dự án đã được thiết lập sẵn **GitHub Actions (CI)**:
 - Cài đặt JDK 21 và tự động chạy `mvn clean package` để Build & Run Unit Test, đảm bảo độ ổn định của hệ thống 100%.
 
 ---
-*Phát triển bởi [VinhHoHuu](https://github.com/VinhHoHuu).*
+
+## 🤖 Hỗ trợ bởi Trí tuệ Nhân tạo (AI-Assisted Development)
+Dự án này được phát triển với sự đồng hành của **Trợ lý lập trình AI (Antigravity AI)**. Quá trình phát triển áp dụng mô hình "Pair Programming" giữa kỹ sư phần mềm và AI nhằm:
+- **Tối ưu hóa kiến trúc:** Xây dựng hệ thống clean code, tối ưu hóa các câu truy vấn JPA/Hibernate và thiết lập luồng xác thực bảo mật JWT chặt chẽ.
+- **Tích hợp công nghệ hiện đại:** Hỗ trợ cài đặt nhanh chóng MinIO SDK, Docker Compose và GitHub Actions CI/CD.
+- **Xử lý sự cố (Troubleshooting):** Tự động hóa quá trình debug, phát hiện lỗi xung đột thư viện (như Swagger UI và Spring Boot DevTools) và đưa ra giải pháp khắc phục triệt để.
+
+---
+*Phát triển bởi [VinhHoHuu](https://github.com/VinhHoHuu) & Antigravity AI.*
