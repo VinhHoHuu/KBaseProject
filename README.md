@@ -92,11 +92,35 @@ Dự án đã được thiết lập sẵn **GitHub Actions (CI)**:
 
 ---
 
+## 🚀 Hướng dẫn Deployment (CI/CD)
+
+Dự án hỗ trợ sẵn **Docker** giúp bạn dễ dàng deploy lên bất kỳ nền tảng Cloud nào hỗ trợ Container (như Render, AWS, DigitalOcean).
+
+### 1. Triển khai bằng Docker Compose (Local/VPS)
+Môi trường `docker-compose.yml` đã định nghĩa sẵn 3 dịch vụ: `postgres`, `minio` và `backend`. Chỉ cần một câu lệnh để chạy toàn bộ hệ thống:
+```bash
+docker-compose up -d --build
+```
+Hệ thống sẽ tự động build image cho Spring Boot và kết nối với các service Database/Storage.
+
+### 2. Triển khai lên Render.com (Web Service)
+1. Đăng nhập vào Render, chọn tạo mới **Web Service**.
+2. Kết nối với Repository Github của bạn.
+3. Trong phần cấu hình, chọn môi trường **Docker**. Render sẽ tự động đọc `Dockerfile` trong source code để build.
+4. Thêm các biến môi trường (Environment Variables) cần thiết cho Server:
+   - `SPRING_DATASOURCE_URL` (URL kết nối DB)
+   - `SPRING_DATASOURCE_USERNAME`
+   - `SPRING_DATASOURCE_PASSWORD`
+   - `MINIO_URL` (URL tới MinIO server của bạn)
+   - `MINIO_ACCESS_KEY` & `MINIO_SECRET_KEY`
+
+---
+
 ## 🤖 Hỗ trợ bởi Trí tuệ Nhân tạo (AI-Assisted Development)
 Dự án này được phát triển với sự đồng hành của **Trợ lý lập trình AI (Antigravity AI)**. Quá trình phát triển áp dụng mô hình "Pair Programming" giữa kỹ sư phần mềm và AI nhằm:
 - **Tối ưu hóa kiến trúc:** Xây dựng hệ thống clean code, tối ưu hóa các câu truy vấn JPA/Hibernate và thiết lập luồng xác thực bảo mật JWT chặt chẽ.
 - **Tích hợp công nghệ hiện đại:** Hỗ trợ cài đặt nhanh chóng MinIO SDK, Docker Compose và GitHub Actions CI/CD.
-- **Xử lý sự cố (Troubleshooting):** Tự động hóa quá trình debug, phát hiện lỗi xung đột thư viện (như Swagger UI và Spring Boot DevTools) và đưa ra giải pháp khắc phục triệt để.
+- **Xử lý sự cố (Troubleshooting):** Tự động hóa quá trình debug, phát hiện lỗi xung đột thư viện và đưa ra giải pháp khắc phục triệt để.
 
 ---
 *Phát triển bởi [VinhHoHuu](https://github.com/VinhHoHuu) & Antigravity AI.*
