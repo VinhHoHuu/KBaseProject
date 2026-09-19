@@ -10,13 +10,15 @@
     <img src="https://img.shields.io/badge/MinIO-S3_Storage-red?style=for-the-badge&logo=minio" alt="MinIO">
     <img src="https://img.shields.io/badge/Security-JWT-red?style=for-the-badge&logo=springsecurity" alt="JWT Security">
     <img src="https://img.shields.io/badge/CI/CD-GitHub_Actions-black?style=for-the-badge&logo=githubactions" alt="GitHub Actions">
+    <img src="https://img.shields.io/badge/Deployment-Render-purple?style=for-the-badge&logo=render" alt="Render">
   </p>
 </div>
 
 ---
 
 ## 🌟 Giới thiệu (Introduction)
-**KBase** là một hệ thống Backend API (tương tự Jira/Trello thu nhỏ) cung cấp các giải pháp quản lý dự án dành cho nhóm làm việc. Dự án tập trung vào tính năng bảo mật với hệ thống xác thực JWT, phân quyền thao tác người dùng, và tối ưu hóa hiệu suất với Hibernate/JPA.
+**KBase** là một hệ thống Backend API (tương tự Jira/Trello thu nhỏ) cung cấp các giải pháp quản lý dự án dành cho nhóm làm việc. Dự án tập trung vào tính năng bảo mật với hệ thống xác thực JWT, phân quyền thao tác người dùng, và tối ưu hóa hiệu suất với Hibernate/JPA. 
+Hệ thống hiện đang được **Deploy Live trên Render** với luồng CI/CD tự động thông qua GitHub Actions và Docker.
 
 ---
 
@@ -80,7 +82,9 @@
 
 ## 📖 Tài liệu API (API Documentation)
 Dự án được tích hợp sẵn **Swagger UI** (OpenAPI 3.0) với giao diện trực quan và tính năng test trực tiếp qua nút `Authorize`.
-👉 Truy cập sau khi chạy server: **[http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)**
+
+- 🟢 **Live Demo (Render):** **[https://kbaseproject.onrender.com/swagger-ui/index.html](https://kbaseproject.onrender.com/swagger-ui/index.html)**
+- 💻 **Localhost:** **[http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)**
 
 ---
 

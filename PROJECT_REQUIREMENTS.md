@@ -87,7 +87,7 @@ Optionally, add an AI chatbot to help quickly find information by answering ques
 
 ---
 
-## 📅 Roadmap & Execution Plan (4 Phases / 4 Days)
+## 📅 Roadmap & Execution Plan (6 Phases / 6 Days)
 
 ### Day 1: Foundation & Security (Phase 1)
 **Focus:** Infrastructure setup, Database Design, and Authentication.
@@ -102,27 +102,44 @@ Optionally, add an AI chatbot to help quickly find information by answering ques
 ### Day 2: Core Domain - Projects & Members (Phase 2)
 **Focus:** Project management and Role-based access control.
 - **Tasks:**
-  - Database schema design for Projects and Project Members (Many-to-Many relationship).
-  - Define user roles logic (Admin vs Owner vs User in a project).
-  - Build Project APIs: Create, Update, Delete, Get All Projects.
-  - Build Project Member APIs: Invite user to project, remove user, list members.
-  - Write basic unit tests and verify APIs via Swagger.
+  - [x] Database schema design for Projects and Project Members (Many-to-Many relationship).
+  - [x] Define user roles logic (Admin vs Owner vs User in a project).
+  - [x] Build Project APIs: Create, Update, Delete, Get All Projects.
+  - [x] Build Project Member APIs: Invite user to project, remove user, list members.
+  - [x] Write basic unit tests and verify APIs via Swagger.
 
 ### Day 3: Document Storage & MinIO Integration (Phase 3)
 **Focus:** Object storage integration and file management.
 - **Tasks:**
-  - Setup AWS S3 SDK / MinIO Client in Spring Boot.
-  - Database schema design for Documents (storing file metadata: name, type, size, url, project_id, uploaded_by).
-  - Build File Upload API: Handle multipart form data, stream to MinIO, save metadata to PostgreSQL.
-  - Build File Download/View APIs: Generate presigned URLs from MinIO or stream through backend.
-  - Add file type validation (Documents, Images, Videos).
+  - [x] Setup AWS S3 SDK / MinIO Client in Spring Boot.
+  - [x] Database schema design for Documents (storing file metadata: name, type, size, url, project_id, uploaded_by).
+  - [x] Build File Upload API: Handle multipart form data, stream to MinIO, save metadata to PostgreSQL.
+  - [x] Build File Download/View APIs: Generate presigned URLs from MinIO or stream through backend.
+  - [x] Add file type validation (Documents, Images, Videos).
 
-### Day 4: Optional Features & Final Polish (Phase 4)
-**Focus:** Wrapping up, AI Integration Prep, and Deployment.
+### Day 4: API Deployment & Dockerization (Phase 4)
+**Focus:** Wrapping up Backend, Dockerization, and Cloud Deployment.
 - **Tasks:**
-  - Define and build the communication interface (REST client) between Spring Boot and the optional Python AI service.
-  - (Optional) Initialize the Python AI service structure (LangChain + FastAPI) for document extraction.
-  - (Optional) Initialize Frontend repository (Next.js/React) and connect basic Auth/Project pages.
-  - Write Dockerfile for the Spring Boot application.
-  - Final end-to-end testing of the complete flow.
-  - Refine documentation.
+  - [x] Write Dockerfile for the Spring Boot application (Multi-stage build).
+  - [x] Update docker-compose.yml to include the backend service.
+  - [x] Setup deployment configurations for Render.com.
+  - [x] Final end-to-end testing of the complete flow.
+  - [x] Refine API documentation and README.
+
+### Day 5: Frontend Foundation & Authentication (Phase 5)
+**Focus:** React/Next.js setup, UI Components, and Auth flow.
+- **Tasks:**
+  - Initialize Frontend project (Next.js/React) with TypeScript & Tailwind CSS.
+  - Setup routing and core layout (Navbar, Sidebar).
+  - Implement Login and Register pages.
+  - Connect with Backend API to handle JWT Authentication (store token).
+  - Create protected routes for logged-in users.
+
+### Day 6: Frontend Integration & File Management (Phase 6)
+**Focus:** Project Dashboard and Document handling.
+- **Tasks:**
+  - Build Project Dashboard (List, Create, and Manage projects).
+  - Build Member Management UI (Invite/Remove members).
+  - Build Document Upload UI (Drag & Drop zone, progress bar).
+  - Integrate with Backend for file download and viewing.
+  - Final end-to-end testing of the complete User flow.
