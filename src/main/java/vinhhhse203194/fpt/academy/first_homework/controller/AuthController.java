@@ -35,8 +35,8 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
         try {
-            String result = authService.login(request);
-            return ResponseEntity.ok(java.util.Map.of("token", result));
+            java.util.Map<String, Object> result = authService.login(request);
+            return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.status(401).body(java.util.Map.of("message", e.getMessage()));
         }

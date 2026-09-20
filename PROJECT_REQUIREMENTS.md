@@ -140,6 +140,16 @@ Optionally, add an AI chatbot to help quickly find information by answering ques
 - **Tasks:**
   - Build Project Dashboard (List, Create, and Manage projects).
   - Build Member Management UI (Invite/Remove members).
-  - Build Document Upload UI (Drag & Drop zone, progress bar).
-  - Integrate with Backend for file download and viewing.
-  - Final end-to-end testing of the complete User flow.
+  - [x] Build Document Upload UI (Drag & Drop zone, progress bar).
+  - [x] Integrate with Backend for file download and viewing.
+  - [x] Final end-to-end testing of the complete User flow.
+
+### Day 7: Final Polish & Frontend Deployment (Phase 7)
+**Focus:** UI refinement, Code quality, and Production Deployment.
+- **Tasks:**
+  - [ ] Polish UI (Inline alerts, smooth transitions, empty states).
+  - [ ] Ensure strict adherence to "Red & White" theme.
+  - [ ] Code clean up (remove unused variables, fix TS/Lint errors).
+  - [ ] Push all final code to GitHub.
+  - [ ] Deploy Frontend to Vercel (or similar hosting) and Backend to Render.
+  - [ ] Update README with live demo links and final architecture.
