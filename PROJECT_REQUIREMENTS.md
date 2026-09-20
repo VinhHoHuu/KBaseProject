@@ -150,6 +150,16 @@ Optionally, add an AI chatbot to help quickly find information by answering ques
   - [ ] Polish UI (Inline alerts, smooth transitions, empty states).
   - [ ] Ensure strict adherence to "Red & White" theme.
   - [ ] Code clean up (remove unused variables, fix TS/Lint errors).
-  - [ ] Push all final code to GitHub.
-  - [ ] Deploy Frontend to Vercel (or similar hosting) and Backend to Render.
-  - [ ] Update README with live demo links and final architecture.
+  - [x] Push all final code to GitHub.
+  - [x] Deploy Frontend to Vercel (Auto-deploy) and Backend to Render (Manual deploy).
+  - [x] Update README with live demo links and final architecture.
+
+### Day 8: AI Chatbot Integration (Phase 8 - Optional)
+**Focus:** Python AI Service to query uploaded documents.
+- **Tasks:**
+  - [ ] Setup Python environment with LangChain and OpenAI / Hugging Face.
+  - [ ] Read text from PDF and documents stored in MinIO.
+  - [ ] Convert videos to text (speech-to-text).
+  - [ ] Store document content in a searchable format (Vector Database).
+  - [ ] Answer questions by finding relevant information.
+  - [ ] Generate smart responses.
