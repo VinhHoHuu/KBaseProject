@@ -39,11 +39,15 @@ public class AuthService {
 
     //Login
     public String login(LoginRequest request) {
-        Authentication authentication = authenticationManager.
-        authenticate(new UsernamePasswordAuthenticationToken(
-            request.getEmail(), request.getPassword()));
-
-        //Nếu là valid login thì gọi hàm tạo JWT token từ JwtUtils
-        return jwtUtils.generateTokenFromEmail(request.getEmail());
+        try {
+            Authentication authentication = authenticationManager.
+            authenticate(new UsernamePasswordAuthenticationToken(
+                request.getEmail(), request.getPassword()));
+            
+            //Nếu là valid login thì gọi hàm tạo JWT token từ JwtUtils
+            return jwtUtils.generateTokenFromEmail(request.getEmail());
+        } catch (org.springframework.security.core.AuthenticationException e) {
+            throw new RuntimeException("Sai email hoặc mật khẩu. Vui lòng kiểm tra lại!");
+        }
     }
 }

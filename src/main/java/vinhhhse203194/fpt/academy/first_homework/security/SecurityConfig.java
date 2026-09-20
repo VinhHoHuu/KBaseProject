@@ -50,7 +50,8 @@ public class SecurityConfig {
     // BỘ LUẬT CHÍNH (Filter Chain)
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable()) // Tắt CSRF vì chúng ta làm API (không làm form HTML truyền thống)
+        http.cors(org.springframework.security.config.Customizer.withDefaults())
+            .csrf(csrf -> csrf.disable()) // Tắt CSRF vì chúng ta làm API (không làm form HTML truyền thống)
             .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint)) // Tuỳ biến lỗi 401
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Không lưu phiên đăng nhập (Stateless)
             .authorizeHttpRequests(auth -> 

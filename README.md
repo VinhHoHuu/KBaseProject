@@ -6,6 +6,8 @@
   <p>
     <img src="https://img.shields.io/badge/Java-21-orange?style=for-the-badge&logo=java" alt="Java 21">
     <img src="https://img.shields.io/badge/Spring_Boot-3.4.0-brightgreen?style=for-the-badge&logo=spring" alt="Spring Boot">
+    <img src="https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js" alt="Next.js">
+    <img src="https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=for-the-badge&logo=tailwind-css" alt="Tailwind CSS">
     <img src="https://img.shields.io/badge/PostgreSQL-15-blue?style=for-the-badge&logo=postgresql" alt="PostgreSQL">
     <img src="https://img.shields.io/badge/MinIO-S3_Storage-red?style=for-the-badge&logo=minio" alt="MinIO">
     <img src="https://img.shields.io/badge/Security-JWT-red?style=for-the-badge&logo=springsecurity" alt="JWT Security">
@@ -22,9 +24,15 @@ Hệ thống hiện đang được **Deploy Live trên Render** với luồng CI
 
 ---
 
-## ⚙️ Tính năng nổi bật (Features)
+## ⚙️ Tính năng & Kiến trúc nổi bật (Features & Architecture)
 
-### 🔐 1. Quản lý Xác thực & Bảo mật (Authentication)
+### ⚛️ 1. Giao diện Người dùng Hiện đại (Frontend Architecture)
+- Phát triển bằng **Next.js 14** (App Router) kết hợp **TypeScript**.
+- Thiết kế UI sắc nét, Responsive với **Tailwind CSS**.
+- **Axios Interceptors:** Xử lý tự động đính kèm chuỗi xác thực JWT vào mọi request, và tự động điều hướng (Redirect) về trang Đăng nhập khi Token hết hạn (Lỗi 401).
+- Kiến trúc phân chia rõ ràng: `components/` (Giao diện), `services/` (Tích hợp API) và `types/` (Định dạng dữ liệu).
+
+### 🔐 2. Quản lý Xác thực & Bảo mật (Backend Authentication)
 - **Đăng ký / Đăng nhập** tài khoản.
 - Mã hóa mật khẩu an toàn với **Bcrypt**.
 - Cấp phát và xác thực bằng thẻ **JSON Web Token (JWT)**.
