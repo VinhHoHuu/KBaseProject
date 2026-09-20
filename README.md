@@ -20,7 +20,11 @@
 
 ## 🌟 Giới thiệu (Introduction)
 **KBase** là một hệ thống Backend API (tương tự Jira/Trello thu nhỏ) cung cấp các giải pháp quản lý dự án dành cho nhóm làm việc. Dự án tập trung vào tính năng bảo mật với hệ thống xác thực JWT, phân quyền thao tác người dùng, và tối ưu hóa hiệu suất với Hibernate/JPA. 
-Hệ thống hiện đang được **Deploy Live trên Render** với luồng CI/CD tự động thông qua GitHub Actions và Docker.
+Hệ thống hiện đang được **Deploy Live** với luồng CI/CD tự động thông qua GitHub Actions và Docker.
+
+- 🌐 **Giao diện chính thức (Vercel):** **[https://k-base-project.vercel.app](https://k-base-project.vercel.app)**
+- 🚀 **Backend API (Render):** **[https://kbaseproject.onrender.com/](https://kbaseproject.onrender.com/)**
+- 🟢 **Swagger UI API Docs:** **[https://kbaseproject.onrender.com/swagger-ui/index.html](https://kbaseproject.onrender.com/swagger-ui/index.html)**
 
 ---
 
@@ -116,7 +120,7 @@ docker-compose up -d --build
 ```
 Hệ thống sẽ tự động build image cho Spring Boot và kết nối với các service Database/Storage.
 
-### 2. Triển khai lên Render.com (Web Service)
+### 2. Triển khai Backend lên Render.com (Web Service)
 1. Đăng nhập vào Render, chọn tạo mới **Web Service**.
 2. Kết nối với Repository Github của bạn.
 3. Trong phần cấu hình, chọn môi trường **Docker**. Render sẽ tự động đọc `Dockerfile` trong source code để build.
@@ -126,6 +130,14 @@ Hệ thống sẽ tự động build image cho Spring Boot và kết nối với
    - `SPRING_DATASOURCE_PASSWORD`
    - `MINIO_URL` (URL tới MinIO server của bạn)
    - `MINIO_ACCESS_KEY` & `MINIO_SECRET_KEY`
+
+### 3. Triển khai Frontend lên Vercel
+1. Đăng nhập vào **Vercel** bằng tài khoản GitHub.
+2. Chọn **Add New -> Project** và Import repository `KBaseProject`.
+3. Trong cấu hình dự án, đổi `Root Directory` thành thư mục `frontend`.
+4. Thêm biến môi trường:
+   - `NEXT_PUBLIC_API_URL` = `https://kbaseproject.onrender.com/api` (URL của Backend API)
+5. Bấm **Deploy**. Vercel sẽ tự động build Next.js và cập nhật mỗi khi có code mới đẩy lên nhánh `main`.
 
 ---
 
