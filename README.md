@@ -91,7 +91,8 @@ Hệ thống hiện đang được **Deploy Live trên Render** với luồng CI
 ## 📖 Tài liệu API (API Documentation)
 Dự án được tích hợp sẵn **Swagger UI** (OpenAPI 3.0) với giao diện trực quan và tính năng test trực tiếp qua nút `Authorize`.
 
-- 🟢 **Live Demo (Render):** **[https://kbaseproject.onrender.com/swagger-ui/index.html](https://kbaseproject.onrender.com/swagger-ui/index.html)**
+- 🚀 **Trang chủ API (Render):** **[https://kbaseproject.onrender.com/](https://kbaseproject.onrender.com/)**
+- 🟢 **Swagger UI (Render):** **[https://kbaseproject.onrender.com/swagger-ui/index.html](https://kbaseproject.onrender.com/swagger-ui/index.html)**
 - 💻 **Localhost:** **[http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)**
 
 ---
