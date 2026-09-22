@@ -55,7 +55,8 @@ public class SecurityConfig {
             .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint)) // Tuỳ biến lỗi 401
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Không lưu phiên đăng nhập (Stateless)
             .authorizeHttpRequests(auth -> 
-                auth.requestMatchers("/", "/api/auth/**", "/error").permitAll() // LUẬT 1: Đường này (/api/auth) là để Đăng nhập/Đăng ký nên THẢ CỬA. "/error" để hiển thị lỗi gốc.
+                auth.dispatcherTypeMatchers(jakarta.servlet.DispatcherType.FORWARD, jakarta.servlet.DispatcherType.ERROR).permitAll()
+                    .requestMatchers("/", "/api/auth/**", "/error").permitAll() // LUẬT 1: Đường này (/api/auth) là để Đăng nhập/Đăng ký nên THẢ CỬA. "/error" để hiển thị lỗi gốc.
                     .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll() // Mở cửa cho Swagger
                     .anyRequest().authenticated() // LUẬT 2: Toàn bộ các đường khác bắt buộc phải TRÌNH THẺ
             );
