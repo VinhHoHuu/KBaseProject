@@ -6,7 +6,20 @@ import Link from 'next/link';
 import { AuthService } from '@/services/auth.service';
 import { ProjectService } from '@/services/project.service';
 import { User } from '@/types/auth.types';
-import { Project } from '@/types/project.types';
+import { Project, ProjectStatus } from '@/types/project.types';
+import toast from 'react-hot-toast';
+
+const STATUS_COLORS: Record<ProjectStatus, string> = {
+  PLANNED: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200',
+  IN_PROGRESS: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 border-yellow-200',
+  COMPLETED: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border-green-200'
+};
+
+const STATUS_LABELS: Record<ProjectStatus, string> = {
+  PLANNED: 'Lên kế hoạch',
+  IN_PROGRESS: 'Đang thực hiện',
+  COMPLETED: 'Hoàn thành'
+};
 
 export default function Home() {
   const router = useRouter();
@@ -18,6 +31,8 @@ export default function Home() {
   const [showModal, setShowModal] = useState(false);
   const [newProjectName, setNewProjectName] = useState('');
   const [newProjectDesc, setNewProjectDesc] = useState('');
+  const [newProjectStartDate, setNewProjectStartDate] = useState('');
+  const [newProjectEndDate, setNewProjectEndDate] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -58,13 +73,19 @@ export default function Home() {
     try {
       await ProjectService.createProject({
         name: newProjectName,
-        description: newProjectDesc
+        description: newProjectDesc,
+        startDate: newProjectStartDate ? `${newProjectStartDate}T00:00:00` : undefined,
+        endDate: newProjectEndDate ? `${newProjectEndDate}T23:59:59` : undefined
       });
       setShowModal(false);
       setNewProjectName('');
       setNewProjectDesc('');
+      setNewProjectStartDate('');
+      setNewProjectEndDate('');
+      toast.success('Tạo dự án mới thành công!');
       fetchProjects(); // refresh list
     } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Có lỗi xảy ra khi tạo dự án');
       setErrorMsg(err.response?.data?.message || 'Có lỗi xảy ra khi tạo dự án');
     } finally {
       setIsSubmitting(false);
@@ -120,20 +141,33 @@ export default function Home() {
                     <h3 className="text-lg font-bold text-gray-900 dark:text-white group-hover:text-red-600 transition-colors">
                       {project.name}
                     </h3>
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                      project.myRole === 'OWNER' 
-                        ? 'bg-red-600 text-white shadow-sm' 
-                        : 'bg-red-50 text-red-600 border border-red-100 dark:bg-red-900/30 dark:border-red-800 dark:text-red-300'
-                    }`}>
-                      {project.myRole}
-                    </span>
+                    <div className="flex gap-2">
+                      {project.status && (
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium border ${STATUS_COLORS[project.status]}`}>
+                          {STATUS_LABELS[project.status]}
+                        </span>
+                      )}
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ${
+                        project.myRole === 'OWNER' 
+                          ? 'bg-red-600 text-white shadow-sm' 
+                          : 'bg-red-50 text-red-600 border border-red-100 dark:bg-red-900/30 dark:border-red-800 dark:text-red-300'
+                      }`}>
+                        {project.myRole}
+                      </span>
+                    </div>
                   </div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-3">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-3">
                     {project.description}
                   </p>
+                  {(project.startDate || project.endDate) && (
+                    <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1 mt-auto">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                      {project.startDate ? new Date(project.startDate).toLocaleDateString('vi-VN') : '?'} - {project.endDate ? new Date(project.endDate).toLocaleDateString('vi-VN') : '?'}
+                    </div>
+                  )}
                 </div>
-                <div className="px-5 py-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-100 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400">
-                  Tạo ngày: {new Date(project.createdAt).toLocaleDateString('vi-VN')}
+                <div className="px-5 py-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-100 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400 flex justify-between">
+                  <span>Tạo ngày: {new Date(project.createdAt).toLocaleDateString('vi-VN')}</span>
                 </div>
               </div>
             </Link>
@@ -178,12 +212,36 @@ export default function Home() {
                       Mô tả dự án
                     </label>
                     <textarea
-                      rows={3}
+                      rows={2}
                       value={newProjectDesc}
                       onChange={(e) => setNewProjectDesc(e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm bg-transparent dark:text-white resize-none"
                       placeholder="Viết một vài dòng mô tả về dự án này..."
                     />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Ngày bắt đầu
+                      </label>
+                      <input
+                        type="date"
+                        value={newProjectStartDate}
+                        onChange={(e) => setNewProjectStartDate(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm bg-transparent dark:text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Ngày dự kiến kết thúc
+                      </label>
+                      <input
+                        type="date"
+                        value={newProjectEndDate}
+                        onChange={(e) => setNewProjectEndDate(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm bg-transparent dark:text-white"
+                      />
+                    </div>
                   </div>
                 </div>
 

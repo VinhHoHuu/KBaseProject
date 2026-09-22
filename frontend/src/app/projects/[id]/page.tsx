@@ -7,11 +7,23 @@ import { ProjectService } from '@/services/project.service';
 import { MemberService } from '@/services/member.service';
 import { DocumentService } from '@/services/document.service';
 import { AuthService } from '@/services/auth.service';
-import { Project, ProjectMember } from '@/types/project.types';
+import { Project, ProjectMember, ProjectStatus } from '@/types/project.types';
 import { Document } from '@/types/document.types';
 import { User } from '@/types/auth.types';
 import { use } from 'react';
 import toast from 'react-hot-toast';
+
+const STATUS_COLORS: Record<ProjectStatus, string> = {
+  PLANNED: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200',
+  IN_PROGRESS: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 border-yellow-200',
+  COMPLETED: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border-green-200'
+};
+
+const STATUS_LABELS: Record<ProjectStatus, string> = {
+  PLANNED: 'Lên kế hoạch',
+  IN_PROGRESS: 'Đang thực hiện',
+  COMPLETED: 'Hoàn thành'
+};
 
 export default function ProjectDetails({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -38,6 +50,9 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
   const [isEditingProject, setIsEditingProject] = useState(false);
   const [editProjectName, setEditProjectName] = useState('');
   const [editProjectDesc, setEditProjectDesc] = useState('');
+  const [editProjectStartDate, setEditProjectStartDate] = useState('');
+  const [editProjectEndDate, setEditProjectEndDate] = useState('');
+  const [editProjectStatus, setEditProjectStatus] = useState<ProjectStatus>('PLANNED');
   const [isSavingProject, setIsSavingProject] = useState(false);
 
   const loadData = async () => {
@@ -53,6 +68,9 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
       setProject(projData);
       setEditProjectName(projData.name);
       setEditProjectDesc(projData.description || '');
+      setEditProjectStartDate(projData.startDate ? projData.startDate.split('T')[0] : '');
+      setEditProjectEndDate(projData.endDate ? projData.endDate.split('T')[0] : '');
+      setEditProjectStatus(projData.status || 'PLANNED');
       setMembers(membersData);
       setDocuments(docsData);
     } catch (err: any) {
@@ -110,7 +128,10 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
     try {
       await ProjectService.updateProject(projectId, {
         name: editProjectName,
-        description: editProjectDesc
+        description: editProjectDesc,
+        startDate: editProjectStartDate ? `${editProjectStartDate}T00:00:00` : undefined,
+        endDate: editProjectEndDate ? `${editProjectEndDate}T23:59:59` : undefined,
+        status: editProjectStatus
       });
       toast.success('Cập nhật dự án thành công!');
       setIsEditingProject(false);
@@ -119,6 +140,17 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
       toast.error(err.response?.data?.message || 'Có lỗi xảy ra khi cập nhật dự án');
     } finally {
       setIsSavingProject(false);
+    }
+  };
+
+  const handleDeleteProject = async () => {
+    if (!confirm('CẢNH BÁO: Hành động này sẽ xóa TOÀN BỘ dữ liệu của dự án. Bạn có chắc chắn muốn xóa không?')) return;
+    try {
+      await ProjectService.deleteProject(projectId);
+      toast.success('Đã xóa dự án!');
+      router.push('/');
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Lỗi khi xóa dự án');
     }
   };
 
@@ -226,10 +258,42 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
               <textarea
                 value={editProjectDesc}
                 onChange={(e) => setEditProjectDesc(e.target.value)}
-                className="w-full text-gray-600 dark:text-gray-300 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-red-500 focus:border-red-500 bg-transparent resize-none"
+                className="w-full text-gray-600 dark:text-gray-300 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-red-500 focus:border-red-500 bg-transparent resize-none mb-3"
                 placeholder="Mô tả dự án"
                 rows={2}
               />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Trạng thái</label>
+                  <select
+                    value={editProjectStatus}
+                    onChange={(e) => setEditProjectStatus(e.target.value as ProjectStatus)}
+                    className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-red-500 focus:border-red-500 bg-transparent text-sm dark:text-white"
+                  >
+                    <option value="PLANNED">Lên kế hoạch</option>
+                    <option value="IN_PROGRESS">Đang thực hiện</option>
+                    <option value="COMPLETED">Hoàn thành</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Ngày bắt đầu</label>
+                  <input
+                    type="date"
+                    value={editProjectStartDate}
+                    onChange={(e) => setEditProjectStartDate(e.target.value)}
+                    className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-red-500 focus:border-red-500 bg-transparent text-sm dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Ngày kết thúc</label>
+                  <input
+                    type="date"
+                    value={editProjectEndDate}
+                    onChange={(e) => setEditProjectEndDate(e.target.value)}
+                    className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-red-500 focus:border-red-500 bg-transparent text-sm dark:text-white"
+                  />
+                </div>
+              </div>
               <div className="mt-3 flex gap-2">
                 <button
                   type="button"
@@ -253,6 +317,11 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                   {project.name}
                 </h1>
+                {project.status && (
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium border ${STATUS_COLORS[project.status]}`}>
+                    {STATUS_LABELS[project.status]}
+                  </span>
+                )}
                 {isOwner && (
                   <button 
                     onClick={() => setIsEditingProject(true)}
@@ -265,18 +334,37 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
                   </button>
                 )}
               </div>
-              <p className="text-gray-600 dark:text-gray-300">
+              <p className="text-gray-600 dark:text-gray-300 mb-2">
                 {project.description}
               </p>
+              {(project.startDate || project.endDate) && (
+                <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1.5 mt-2">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                  <span className="font-medium">Tiến độ:</span> {project.startDate ? new Date(project.startDate).toLocaleDateString('vi-VN') : '?'} - {project.endDate ? new Date(project.endDate).toLocaleDateString('vi-VN') : '?'}
+                </div>
+              )}
             </div>
           )}
-          <span className={`px-3 py-1 rounded-full text-sm font-semibold whitespace-nowrap ml-4 ${
-            project.myRole === 'OWNER'
-              ? 'bg-red-600 text-white shadow-sm'
-              : 'bg-red-50 text-red-600 border border-red-100 dark:bg-red-900/30 dark:border-red-800 dark:text-red-300'
-          }`}>
-            Vai trò của bạn: {project.myRole}
-          </span>
+          
+          <div className="flex flex-col items-end gap-3 ml-4">
+            <span className={`px-3 py-1 rounded-full text-sm font-semibold whitespace-nowrap ${
+              project.myRole === 'OWNER'
+                ? 'bg-red-600 text-white shadow-sm'
+                : 'bg-red-50 text-red-600 border border-red-100 dark:bg-red-900/30 dark:border-red-800 dark:text-red-300'
+            }`}>
+              Vai trò của bạn: {project.myRole}
+            </span>
+            
+            {isOwner && (
+              <button
+                onClick={handleDeleteProject}
+                className="text-xs text-red-600 hover:text-white border border-red-600 hover:bg-red-600 px-3 py-1 rounded transition-colors whitespace-nowrap flex items-center gap-1"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                Xóa dự án
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
