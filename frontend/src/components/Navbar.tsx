@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { AuthService } from '@/services/auth.service';
 import { User } from '@/types/auth.types';
@@ -9,12 +9,13 @@ import Image from 'next/image';
 
 export default function Navbar() {
   const router = useRouter();
+  const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     // Only access localStorage on the client side
     setUser(AuthService.getCurrentUser());
-  }, []);
+  }, [pathname]);
 
   const handleLogout = () => {
     AuthService.logout();
