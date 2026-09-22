@@ -27,7 +27,7 @@ export default function RegisterPage() {
 
     try {
       await AuthService.register({ email, password, fullName });
-      // Đăng ký thành công, chuyển qua trang đăng nhập
+      // Registration successful, redirect to login page
       router.push('/login');
     } catch (err: any) {
       setError(err.response?.data || err.response?.data?.message || 'Registration failed.');
@@ -93,7 +93,7 @@ export default function RegisterPage() {
                 placeholder="••••••••"
               />
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                Mật khẩu phải từ 6 ký tự, gồm ít nhất 1 chữ hoa, 1 chữ thường và 1 số.
+                Password must be at least 6 characters, including 1 uppercase letter, 1 lowercase letter, and 1 number.
               </p>
             </div>
             <div>

@@ -34,8 +34,15 @@ public class ProjectService {
         project.setName(request.getName());
         project.setDescription(request.getDescription());
 
-        //B2: gán owner cho dự án chính
+        //B2: gán owner, start date, end date và project status cho dự án chính
         project.setOwner(currentUser);
+        project.setStartDate(request.getStartDate());
+        project.setEndDate(request.getEndDate());
+        if (request.getStatus() != null) {
+            project.setStatus(request.getStatus());
+        } else {
+            project.setStatus(vinhhhse203194.fpt.academy.first_homework.entity.ProjectStatus.PLANNED);
+        }
 
         //B3: lưu vào database
         projectRepository.save(project);
@@ -104,11 +111,18 @@ public class ProjectService {
         }
         
         //B3: Update thông tin của project
+        //set name, description nếu request có field này
         if(updateProject.getName() != null && !updateProject.getName().isEmpty()){
             currentProject.setName(updateProject.getName());
         }
         if(updateProject.getDescription() != null && !updateProject.getDescription().isEmpty()){
             currentProject.setDescription(updateProject.getDescription());
+        }
+        
+        currentProject.setStartDate(updateProject.getStartDate());
+        currentProject.setEndDate(updateProject.getEndDate());
+        if (updateProject.getStatus() != null) {
+            currentProject.setStatus(updateProject.getStatus());
         }
 
         //B4: Lưu project đã update vào database
@@ -241,6 +255,9 @@ public class ProjectService {
         response.setDescription(project.getDescription());
         response.setCreatedAt(project.getCreatedAt());
         response.setMyRole(role);
+        response.setStartDate(project.getStartDate());
+        response.setEndDate(project.getEndDate());
+        response.setStatus(project.getStatus());
         return response;
     }
 

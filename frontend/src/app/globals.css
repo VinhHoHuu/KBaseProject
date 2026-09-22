@@ -24,3 +24,47 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+
+/* FullCalendar Custom Overrides */
+.calendar-container .fc {
+  font-family: inherit;
+}
+.calendar-container .fc-toolbar-title {
+  font-size: 1.25rem !important;
+  font-weight: 700;
+}
+.calendar-container .fc-event {
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  border: none;
+  font-weight: 600;
+  color: white !important;
+}
+.calendar-container .fc-event-title {
+  color: white !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  .calendar-container .fc-theme-standard td, 
+  .calendar-container .fc-theme-standard th {
+    border-color: #374151 !important; /* gray-700 */
+  }
+  .calendar-container .fc-theme-standard .fc-scrollgrid {
+    border-color: #374151 !important;
+  }
+  .calendar-container .fc-col-header-cell-cushion, 
+  .calendar-container .fc-daygrid-day-number {
+    color: #e5e7eb !important; /* gray-200 */
+  }
+  .calendar-container .fc-button-primary {
+    background-color: #dc2626 !important; /* red-600 */
+    border-color: #dc2626 !important;
+  }
+  .calendar-container .fc-button-primary:hover {
+    background-color: #b91c1c !important; /* red-700 */
+    border-color: #b91c1c !important;
+  }
+}
+

@@ -1,7 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import interactionPlugin from '@fullcalendar/interaction';
 import Link from 'next/link';
 import { AuthService } from '@/services/auth.service';
 import { ProjectService } from '@/services/project.service';
@@ -16,9 +20,9 @@ const STATUS_COLORS: Record<ProjectStatus, string> = {
 };
 
 const STATUS_LABELS: Record<ProjectStatus, string> = {
-  PLANNED: 'Lên kế hoạch',
-  IN_PROGRESS: 'Đang thực hiện',
-  COMPLETED: 'Hoàn thành'
+  PLANNED: 'Planned',
+  IN_PROGRESS: 'In Progress',
+  COMPLETED: 'Completed'
 };
 
 export default function Home() {
@@ -26,6 +30,54 @@ export default function Home() {
   const [user, setUser] = useState<User | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Dashboard Controls
+  const [viewMode, setViewMode] = useState<'grid' | 'calendar'>('grid');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | ProjectStatus>('ALL');
+
+  // Filter projects based on status
+  const filteredProjects = useMemo(() => {
+    if (statusFilter === 'ALL') return projects;
+    return projects.filter(p => p.status === statusFilter);
+  }, [projects, statusFilter]);
+
+  // Deterministic color generator for projects based on ID
+  const getProjectColor = (id: number) => {
+    const PROJECT_COLORS = [
+      '#ef4444', // red-500
+      '#f97316', // orange-500
+      '#f59e0b', // amber-500
+      '#84cc16', // lime-500
+      '#10b981', // emerald-500
+      '#06b6d4', // cyan-500
+      '#3b82f6', // blue-500
+      '#6366f1', // indigo-500
+      '#8b5cf6', // violet-500
+      '#d946ef', // fuchsia-500
+      '#f43f5e', // rose-500
+    ];
+    return PROJECT_COLORS[id % PROJECT_COLORS.length];
+  };
+
+  // Calendar Events map (exclude COMPLETED and projects without dates)
+  const calendarEvents = useMemo(() => {
+    return projects
+      .filter(p => p.status !== 'COMPLETED' && (p.startDate || p.endDate))
+      .map(p => {
+        const pColor = getProjectColor(p.id);
+        
+        return {
+          id: p.id.toString(),
+          title: p.name,
+          start: p.startDate,
+          end: p.endDate,
+          allDay: true, 
+          backgroundColor: 'transparent', // We will handle UI in eventContent
+          borderColor: 'transparent',
+          extendedProps: { ...p, color: pColor }
+        };
+      });
+  }, [projects]);
   
   // Modal states
   const [showModal, setShowModal] = useState(false);
@@ -68,6 +120,29 @@ export default function Home() {
   const handleCreateProject = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
+    
+    // Validations
+    if (newProjectStartDate) {
+      const start = new Date(newProjectStartDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      if (start < today) {
+        toast.error('Start date cannot be in the past!');
+        setErrorMsg('Start date cannot be in the past!');
+        return;
+      }
+      
+      if (newProjectEndDate) {
+        const end = new Date(newProjectEndDate);
+        if (start > end) {
+          toast.error('Start date cannot be after end date!');
+          setErrorMsg('Start date cannot be after end date!');
+          return;
+        }
+      }
+    }
+
     setIsSubmitting(true);
     
     try {
@@ -82,11 +157,11 @@ export default function Home() {
       setNewProjectDesc('');
       setNewProjectStartDate('');
       setNewProjectEndDate('');
-      toast.success('Tạo dự án mới thành công!');
+      toast.success('Project created successfully!');
       fetchProjects(); // refresh list
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Có lỗi xảy ra khi tạo dự án');
-      setErrorMsg(err.response?.data?.message || 'Có lỗi xảy ra khi tạo dự án');
+      toast.error(err.response?.data?.message || 'An error occurred while creating the project');
+      setErrorMsg(err.response?.data?.message || 'An error occurred while creating the project');
     } finally {
       setIsSubmitting(false);
     }
@@ -106,34 +181,124 @@ export default function Home() {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Xin chào, <span className="text-red-600">{user?.fullName || user?.email}</span>!
+            Welcome, <span className="text-red-600">{user?.fullName || user?.email}</span>!
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Đây là danh sách các dự án bạn đang tham gia.
+            Here are the projects you are participating in.
           </p>
         </div>
         <button
           onClick={() => setShowModal(true)}
           className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
         >
-          + Tạo dự án mới
+          + Create Project
         </button>
       </div>
 
-      {/* Projects Grid */}
+      {/* Controls: Filter & View Toggle */}
+      {projects.length > 0 && (
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+          {/* Status Filter Tabs */}
+          <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
+            <button
+              onClick={() => setStatusFilter('ALL')}
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${statusFilter === 'ALL' ? 'bg-white dark:bg-gray-700 shadow text-gray-900 dark:text-white' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
+            >
+              All
+            </button>
+            {Object.entries(STATUS_LABELS).map(([key, label]) => (
+              <button
+                key={key}
+                onClick={() => setStatusFilter(key as ProjectStatus)}
+                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${statusFilter === key ? 'bg-white dark:bg-gray-700 shadow text-gray-900 dark:text-white' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {/* View Toggle */}
+          <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`px-3 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 ${viewMode === 'grid' ? 'bg-white dark:bg-gray-700 shadow text-red-600' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+              Grid
+            </button>
+            <button
+              onClick={() => setViewMode('calendar')}
+              className={`px-3 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 ${viewMode === 'calendar' ? 'bg-white dark:bg-gray-700 shadow text-red-600' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+              Calendar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Main Content Area */}
       {projects.length === 0 ? (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-12 text-center border border-gray-200 dark:border-gray-700">
-          <p className="text-gray-500 dark:text-gray-400 mb-4">Bạn chưa tham gia dự án nào.</p>
+          <p className="text-gray-500 dark:text-gray-400 mb-4">You have not joined any projects yet.</p>
           <button
             onClick={() => setShowModal(true)}
             className="text-red-600 hover:text-red-700 font-medium"
           >
-            Tạo dự án đầu tiên của bạn
+            Create your first project
+          </button>
+        </div>
+      ) : viewMode === 'calendar' ? (
+        <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow border border-gray-200 dark:border-gray-700 calendar-container">
+          <FullCalendar
+            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+            initialView="dayGridMonth"
+            headerToolbar={{
+              left: 'prev,next today',
+              center: 'title',
+              right: 'dayGridMonth,timeGridWeek'
+            }}
+            events={calendarEvents}
+            eventContent={(eventInfo) => {
+              const color = eventInfo.event.extendedProps.color || '#3b82f6';
+              const p = eventInfo.event.extendedProps;
+              const dateText = (p.startDate || p.endDate) ? 
+                `(${p.startDate ? new Date(p.startDate).toLocaleDateString('en-US') : '?'} - ${p.endDate ? new Date(p.endDate).toLocaleDateString('en-US') : '?'})` : '';
+
+              return (
+                <div className="flex items-center gap-1.5 px-2 py-1 w-full overflow-hidden text-xs font-medium rounded-sm border-l-4 shadow-sm" 
+                  style={{ 
+                    backgroundColor: `${color}15`, 
+                    borderColor: color,
+                    color: 'var(--foreground, #1f2937)'
+                  }}>
+                  <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: color }}></div>
+                  <div className="truncate flex items-center gap-1">
+                    <span>{eventInfo.event.title}</span>
+                    <span className="font-normal opacity-75 hidden sm:inline">{dateText}</span>
+                  </div>
+                </div>
+              );
+            }}
+            eventClick={(info) => {
+              router.push(`/projects/${info.event.id}`);
+            }}
+            height="auto"
+          />
+        </div>
+      ) : filteredProjects.length === 0 ? (
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-12 text-center border border-gray-200 dark:border-gray-700">
+          <p className="text-gray-500 dark:text-gray-400 mb-4">No projects found matching the selected status.</p>
+          <button
+            onClick={() => setStatusFilter('ALL')}
+            className="text-red-600 hover:text-red-700 font-medium"
+          >
+            Clear filter
           </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {projects.map((project) => (
+          {filteredProjects.map((project) => (
             <Link key={project.id} href={`/projects/${project.id}`}>
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-200 dark:border-gray-700 h-full flex flex-col overflow-hidden group cursor-pointer">
                 <div className="p-5 flex-grow">
@@ -167,7 +332,7 @@ export default function Home() {
                   )}
                 </div>
                 <div className="px-5 py-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-100 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400 flex justify-between">
-                  <span>Tạo ngày: {new Date(project.createdAt).toLocaleDateString('vi-VN')}</span>
+                  <span>Created on: {new Date(project.createdAt).toLocaleDateString('en-US')}</span>
                 </div>
               </div>
             </Link>
@@ -183,7 +348,7 @@ export default function Home() {
 
             <div className="relative inline-block w-full max-w-md p-6 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-gray-800 shadow-xl rounded-2xl">
               <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
-                Tạo Dự án Mới
+                Create New Project
               </h3>
               
               {errorMsg && (
@@ -196,7 +361,7 @@ export default function Home() {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Tên dự án *
+                      Project Name *
                     </label>
                     <input
                       type="text"
@@ -204,25 +369,25 @@ export default function Home() {
                       value={newProjectName}
                       onChange={(e) => setNewProjectName(e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm bg-transparent dark:text-white"
-                      placeholder="Nhập tên dự án..."
+                      placeholder="Enter project name..."
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Mô tả dự án
+                      Project Description
                     </label>
                     <textarea
                       rows={2}
                       value={newProjectDesc}
                       onChange={(e) => setNewProjectDesc(e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm bg-transparent dark:text-white resize-none"
-                      placeholder="Viết một vài dòng mô tả về dự án này..."
+                      placeholder="Write a brief description for this project..."
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Ngày bắt đầu
+                        Start Date
                       </label>
                       <input
                         type="date"
@@ -233,7 +398,7 @@ export default function Home() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Ngày dự kiến kết thúc
+                        End Date
                       </label>
                       <input
                         type="date"
@@ -251,14 +416,14 @@ export default function Home() {
                     onClick={() => setShowModal(false)}
                     className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                   >
-                    Hủy
+                    Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting}
                     className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
                   >
-                    {isSubmitting ? 'Đang tạo...' : 'Tạo Dự án'}
+                    {isSubmitting ? 'Creating...' : 'Create Project'}
                   </button>
                 </div>
               </form>

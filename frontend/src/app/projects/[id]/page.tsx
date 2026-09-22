@@ -20,9 +20,9 @@ const STATUS_COLORS: Record<ProjectStatus, string> = {
 };
 
 const STATUS_LABELS: Record<ProjectStatus, string> = {
-  PLANNED: 'Lên kế hoạch',
-  IN_PROGRESS: 'Đang thực hiện',
-  COMPLETED: 'Hoàn thành'
+  PLANNED: 'Planned',
+  IN_PROGRESS: 'In Progress',
+  COMPLETED: 'Completed'
 };
 
 export default function ProjectDetails({ params }: { params: Promise<{ id: string }> }) {
@@ -77,7 +77,7 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
       if (err.response?.status === 401) {
         router.push('/login');
       } else {
-        toast.error('Không thể tải dữ liệu dự án. Vui lòng thử lại.');
+        toast.error('Could not load project data. Please try again.');
       }
     } finally {
       setIsLoading(false);
@@ -97,31 +97,51 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
       await MemberService.addMember(projectId, newMemberEmail);
       setNewMemberEmail('');
       setShowAddMember(false);
-      toast.success('Đã thêm thành viên thành công!');
+      toast.success('Member added successfully!');
       await loadData();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Có lỗi xảy ra khi thêm thành viên');
+      toast.error(err.response?.data?.message || 'Error adding member');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleRemoveMember = async (memberId: number) => {
-    if (!confirm('Bạn có chắc chắn muốn xóa thành viên này khỏi dự án?')) return;
+    if (!confirm('Are you sure you want to remove this member from the project?')) return;
     try {
       await MemberService.removeMember(projectId, memberId);
-      toast.success('Đã xóa thành viên!');
+      toast.success('Member removed!');
       await loadData();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Lỗi khi xóa thành viên');
+      toast.error(err.response?.data?.message || 'Error removing member');
     }
   };
 
   const handleUpdateProject = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editProjectName.trim()) {
-      toast.error('Tên dự án không được để trống!');
+      toast.error('Project name cannot be empty!');
       return;
+    }
+    
+    // Validations
+    if (editProjectStartDate) {
+      const start = new Date(editProjectStartDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      if (start < today) {
+        toast.error('Start date cannot be in the past!');
+        return;
+      }
+      
+      if (editProjectEndDate) {
+        const end = new Date(editProjectEndDate);
+        if (start > end) {
+          toast.error('Start date cannot be after end date!');
+          return;
+        }
+      }
     }
     
     setIsSavingProject(true);
@@ -133,24 +153,24 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
         endDate: editProjectEndDate ? `${editProjectEndDate}T23:59:59` : undefined,
         status: editProjectStatus
       });
-      toast.success('Cập nhật dự án thành công!');
+      toast.success('Project updated successfully!');
       setIsEditingProject(false);
       await loadData();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Có lỗi xảy ra khi cập nhật dự án');
+      toast.error(err.response?.data?.message || 'An error occurred while updating the project');
     } finally {
       setIsSavingProject(false);
     }
   };
 
   const handleDeleteProject = async () => {
-    if (!confirm('CẢNH BÁO: Hành động này sẽ xóa TOÀN BỘ dữ liệu của dự án. Bạn có chắc chắn muốn xóa không?')) return;
+    if (!confirm('WARNING: This action will delete ALL data of the project. Are you sure you want to delete it?')) return;
     try {
       await ProjectService.deleteProject(projectId);
-      toast.success('Đã xóa dự án!');
+      toast.success('Project deleted!');
       router.push('/');
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Lỗi khi xóa dự án');
+      toast.error(err.response?.data?.message || 'Error deleting project');
     }
   };
 
@@ -185,30 +205,30 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
   const uploadFile = async (file: File) => {
     // Limit to 100MB as per backend description
     if (file.size > 100 * 1024 * 1024) {
-      toast.error('File quá lớn. Vui lòng chọn file dưới 100MB.');
+      toast.error('File too large. Please select a file under 100MB.');
       return;
     }
     
     setIsUploading(true);
     try {
       await DocumentService.uploadDocument(projectId, file);
-      toast.success('Tải tài liệu lên thành công!');
+      toast.success('Document uploaded successfully!');
       await loadData();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Có lỗi xảy ra khi tải tài liệu lên');
+      toast.error(err.response?.data?.message || 'An error occurred while uploading the document');
     } finally {
       setIsUploading(false);
     }
   };
 
   const handleDeleteDocument = async (docId: number) => {
-    if (!confirm('Bạn có chắc chắn muốn xóa tài liệu này?')) return;
+    if (!confirm('Are you sure you want to delete this document?')) return;
     try {
       await DocumentService.deleteDocument(projectId, docId);
-      toast.success('Đã xóa tài liệu!');
+      toast.success('Document deleted!');
       await loadData();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Lỗi khi xóa tài liệu');
+      toast.error(err.response?.data?.message || 'Error deleting document');
     }
   };
 
@@ -223,9 +243,9 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
   if (!project) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8 text-center">
-        <p className="text-gray-500">Dự án không tồn tại hoặc bạn không có quyền truy cập.</p>
+        <p className="text-gray-500">Project does not exist or you do not have permission to view it.</p>
         <Link href="/" className="text-red-600 hover:underline mt-4 inline-block">
-          Quay lại Dashboard
+          Back to Dashboard
         </Link>
       </div>
     );
@@ -238,7 +258,7 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
       {/* Breadcrumb */}
       <div className="mb-6">
         <Link href="/" className="text-sm text-gray-500 hover:text-red-600 flex items-center gap-1">
-          ← Quay lại Dashboard
+          ← Back to Dashboard
         </Link>
       </div>
 
@@ -252,31 +272,31 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
                 value={editProjectName}
                 onChange={(e) => setEditProjectName(e.target.value)}
                 className="w-full text-2xl font-bold mb-2 px-3 py-1 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-red-500 focus:border-red-500 bg-transparent dark:text-white"
-                placeholder="Tên dự án"
+                placeholder="Project Name"
                 required
               />
               <textarea
                 value={editProjectDesc}
                 onChange={(e) => setEditProjectDesc(e.target.value)}
                 className="w-full text-gray-600 dark:text-gray-300 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-red-500 focus:border-red-500 bg-transparent resize-none mb-3"
-                placeholder="Mô tả dự án"
+                placeholder="Project Description"
                 rows={2}
               />
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Trạng thái</label>
+                  <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Status</label>
                   <select
                     value={editProjectStatus}
                     onChange={(e) => setEditProjectStatus(e.target.value as ProjectStatus)}
                     className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-red-500 focus:border-red-500 bg-transparent text-sm dark:text-white"
                   >
-                    <option value="PLANNED">Lên kế hoạch</option>
-                    <option value="IN_PROGRESS">Đang thực hiện</option>
-                    <option value="COMPLETED">Hoàn thành</option>
+                    <option value="PLANNED">Planned</option>
+                    <option value="IN_PROGRESS">In Progress</option>
+                    <option value="COMPLETED">Completed</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Ngày bắt đầu</label>
+                  <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Start Date</label>
                   <input
                     type="date"
                     value={editProjectStartDate}
@@ -285,7 +305,7 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Ngày kết thúc</label>
+                  <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">End Date</label>
                   <input
                     type="date"
                     value={editProjectEndDate}
@@ -300,14 +320,14 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
                   onClick={() => setIsEditingProject(false)}
                   className="px-3 py-1.5 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 rounded transition-colors"
                 >
-                  Hủy
+                  Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSavingProject}
                   className="px-3 py-1.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded transition-colors disabled:opacity-50"
                 >
-                  {isSavingProject ? 'Đang lưu...' : 'Lưu thay đổi'}
+                  {isSavingProject ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
             </form>
@@ -326,7 +346,7 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
                   <button 
                     onClick={() => setIsEditingProject(true)}
                     className="text-gray-400 hover:text-red-600 transition-colors"
-                    title="Chỉnh sửa dự án"
+                    title="Edit Project"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -340,7 +360,7 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
               {(project.startDate || project.endDate) && (
                 <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1.5 mt-2">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                  <span className="font-medium">Tiến độ:</span> {project.startDate ? new Date(project.startDate).toLocaleDateString('vi-VN') : '?'} - {project.endDate ? new Date(project.endDate).toLocaleDateString('vi-VN') : '?'}
+                  <span className="font-medium">Schedule:</span> {project.startDate ? new Date(project.startDate).toLocaleDateString('en-US') : '?'} - {project.endDate ? new Date(project.endDate).toLocaleDateString('en-US') : '?'}
                 </div>
               )}
             </div>
@@ -352,7 +372,7 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
                 ? 'bg-red-600 text-white shadow-sm'
                 : 'bg-red-50 text-red-600 border border-red-100 dark:bg-red-900/30 dark:border-red-800 dark:text-red-300'
             }`}>
-              Vai trò của bạn: {project.myRole}
+              Your Role: {project.myRole}
             </span>
             
             {isOwner && (
@@ -361,7 +381,7 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
                 className="text-xs text-red-600 hover:text-white border border-red-600 hover:bg-red-600 px-3 py-1 rounded transition-colors whitespace-nowrap flex items-center gap-1"
               >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                Xóa dự án
+                Delete Project
               </button>
             )}
           </div>
@@ -374,7 +394,7 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
           <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 border border-gray-200 dark:border-gray-700">
             <div className="flex justify-between items-center mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                Tài liệu dự án ({documents.length})
+                Project Documents ({documents.length})
               </h2>
             </div>
             
@@ -394,16 +414,16 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                  Kéo thả file vào đây hoặc <label className="text-red-600 hover:text-red-700 cursor-pointer font-medium">
-                    chọn file
+                  Drag and drop files here or <label className="text-red-600 hover:text-red-700 cursor-pointer font-medium">
+                    browse
                     <input type="file" className="hidden" onChange={handleFileSelect} disabled={isUploading} />
                   </label>
                 </p>
-                <p className="text-xs text-gray-500">Hỗ trợ mọi định dạng (Tối đa 100MB)</p>
+                <p className="text-xs text-gray-500">Supports all formats (Max 100MB)</p>
                 {isUploading && (
                   <div className="mt-3 text-sm text-red-600 flex items-center">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600 mr-2"></div>
-                    Đang tải lên...
+                    Uploading...
                   </div>
                 )}
               </div>
@@ -412,7 +432,7 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
             {/* Document List */}
             {documents.length === 0 ? (
               <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                Chưa có tài liệu nào trong dự án.
+                No documents found in this project.
               </div>
             ) : (
               <ul className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -442,9 +462,9 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
                           <div className="flex gap-2 text-xs text-gray-500 dark:text-gray-400 mt-1">
                             <span>{fileSize}</span>
                             <span>•</span>
-                            <span>Người đăng: {doc.uploadedByUsername}</span>
+                            <span>Uploaded by: {doc.uploadedByUsername}</span>
                             <span>•</span>
-                            <span>{new Date(doc.uploadedAt).toLocaleDateString('vi-VN')}</span>
+                            <span>{new Date(doc.uploadedAt).toLocaleDateString('en-US')}</span>
                           </div>
                         </div>
                       </div>
@@ -453,7 +473,7 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
                         <button
                           onClick={() => handleDeleteDocument(doc.id)}
                           className="text-gray-400 hover:text-red-600 p-2 rounded-full hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
-                          title="Xóa tài liệu"
+                          title="Delete document"
                         >
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -473,14 +493,14 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
           <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 border border-gray-200 dark:border-gray-700">
             <div className="flex justify-between items-center mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                Thành viên ({members.length})
+                Members ({members.length})
               </h2>
               {isOwner && (
                 <button
                   onClick={() => setShowAddMember(!showAddMember)}
                   className="text-sm text-red-600 hover:text-red-700 font-medium"
                 >
-                  + Thêm
+                  + Add
                 </button>
               )}
             </div>
@@ -488,7 +508,7 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
             {showAddMember && isOwner && (
               <form onSubmit={handleAddMember} className="mb-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Email thành viên mới
+                  New Member Email
                 </label>
                 <div className="flex gap-2">
                   <input
@@ -497,14 +517,14 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
                     value={newMemberEmail}
                     onChange={(e) => setNewMemberEmail(e.target.value)}
                     className="flex-1 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm bg-transparent dark:text-white"
-                    placeholder="VD: user@gmail.com"
+                    placeholder="e.g. user@gmail.com"
                   />
                   <button
                     type="submit"
                     disabled={isSubmitting}
                     className="px-3 py-1.5 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
                   >
-                    Mời
+                    Invite
                   </button>
                 </div>
               </form>
@@ -535,7 +555,7 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
                       <button
                         onClick={() => handleRemoveMember(member.id)}
                         className="text-gray-400 hover:text-red-600 transition-colors"
-                        title="Xóa thành viên"
+                        title="Remove member"
                       >
                         ✕
                       </button>

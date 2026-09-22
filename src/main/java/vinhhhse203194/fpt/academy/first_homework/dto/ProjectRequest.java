@@ -2,6 +2,8 @@ package vinhhhse203194.fpt.academy.first_homework.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+import java.time.LocalDateTime;
+import vinhhhse203194.fpt.academy.first_homework.entity.ProjectStatus;
 
 @Data
 public class ProjectRequest {
@@ -9,4 +11,11 @@ public class ProjectRequest {
     private String name;
     
     private String description;
+
+    private LocalDateTime startDate;
+
+    private LocalDateTime endDate;
+
+    private ProjectStatus status;
+
 }
