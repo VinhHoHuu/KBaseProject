@@ -11,6 +11,7 @@ import { Project, ProjectMember } from '@/types/project.types';
 import { Document } from '@/types/document.types';
 import { User } from '@/types/auth.types';
 import { use } from 'react';
+import toast from 'react-hot-toast';
 
 export default function ProjectDetails({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -33,6 +34,12 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
+  // Edit Project states
+  const [isEditingProject, setIsEditingProject] = useState(false);
+  const [editProjectName, setEditProjectName] = useState('');
+  const [editProjectDesc, setEditProjectDesc] = useState('');
+  const [isSavingProject, setIsSavingProject] = useState(false);
+
   const loadData = async () => {
     try {
       const currentUser = AuthService.getCurrentUser();
@@ -44,13 +51,15 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
         DocumentService.getDocuments(projectId)
       ]);
       setProject(projData);
+      setEditProjectName(projData.name);
+      setEditProjectDesc(projData.description || '');
       setMembers(membersData);
       setDocuments(docsData);
     } catch (err: any) {
       if (err.response?.status === 401) {
         router.push('/login');
       } else {
-        setErrorMsg('Không thể tải dữ liệu dự án. Vui lòng thử lại.');
+        toast.error('Không thể tải dữ liệu dự án. Vui lòng thử lại.');
       }
     } finally {
       setIsLoading(false);
@@ -70,9 +79,10 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
       await MemberService.addMember(projectId, newMemberEmail);
       setNewMemberEmail('');
       setShowAddMember(false);
+      toast.success('Đã thêm thành viên thành công!');
       await loadData();
     } catch (err: any) {
-      setErrorMsg(err.response?.data?.message || 'Có lỗi xảy ra khi thêm thành viên');
+      toast.error(err.response?.data?.message || 'Có lỗi xảy ra khi thêm thành viên');
     } finally {
       setIsSubmitting(false);
     }
@@ -82,9 +92,33 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
     if (!confirm('Bạn có chắc chắn muốn xóa thành viên này khỏi dự án?')) return;
     try {
       await MemberService.removeMember(projectId, memberId);
+      toast.success('Đã xóa thành viên!');
       await loadData();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Lỗi khi xóa thành viên');
+      toast.error(err.response?.data?.message || 'Lỗi khi xóa thành viên');
+    }
+  };
+
+  const handleUpdateProject = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editProjectName.trim()) {
+      toast.error('Tên dự án không được để trống!');
+      return;
+    }
+    
+    setIsSavingProject(true);
+    try {
+      await ProjectService.updateProject(projectId, {
+        name: editProjectName,
+        description: editProjectDesc
+      });
+      toast.success('Cập nhật dự án thành công!');
+      setIsEditingProject(false);
+      await loadData();
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Có lỗi xảy ra khi cập nhật dự án');
+    } finally {
+      setIsSavingProject(false);
     }
   };
 
@@ -119,16 +153,17 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
   const uploadFile = async (file: File) => {
     // Limit to 100MB as per backend description
     if (file.size > 100 * 1024 * 1024) {
-      alert('File quá lớn. Vui lòng chọn file dưới 100MB.');
+      toast.error('File quá lớn. Vui lòng chọn file dưới 100MB.');
       return;
     }
     
     setIsUploading(true);
     try {
       await DocumentService.uploadDocument(projectId, file);
+      toast.success('Tải tài liệu lên thành công!');
       await loadData();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Có lỗi xảy ra khi tải tài liệu lên');
+      toast.error(err.response?.data?.message || 'Có lỗi xảy ra khi tải tài liệu lên');
     } finally {
       setIsUploading(false);
     }
@@ -138,9 +173,10 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
     if (!confirm('Bạn có chắc chắn muốn xóa tài liệu này?')) return;
     try {
       await DocumentService.deleteDocument(projectId, docId);
+      toast.success('Đã xóa tài liệu!');
       await loadData();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Lỗi khi xóa tài liệu');
+      toast.error(err.response?.data?.message || 'Lỗi khi xóa tài liệu');
     }
   };
 
@@ -177,15 +213,64 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
       {/* Project Header */}
       <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-8 border-t-4 border-red-600">
         <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              {project.name}
-            </h1>
-            <p className="text-gray-600 dark:text-gray-300">
-              {project.description}
-            </p>
-          </div>
-          <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+          {isEditingProject ? (
+            <form onSubmit={handleUpdateProject} className="flex-1 mr-4">
+              <input
+                type="text"
+                value={editProjectName}
+                onChange={(e) => setEditProjectName(e.target.value)}
+                className="w-full text-2xl font-bold mb-2 px-3 py-1 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-red-500 focus:border-red-500 bg-transparent dark:text-white"
+                placeholder="Tên dự án"
+                required
+              />
+              <textarea
+                value={editProjectDesc}
+                onChange={(e) => setEditProjectDesc(e.target.value)}
+                className="w-full text-gray-600 dark:text-gray-300 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-red-500 focus:border-red-500 bg-transparent resize-none"
+                placeholder="Mô tả dự án"
+                rows={2}
+              />
+              <div className="mt-3 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsEditingProject(false)}
+                  className="px-3 py-1.5 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 rounded transition-colors"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingProject}
+                  className="px-3 py-1.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded transition-colors disabled:opacity-50"
+                >
+                  {isSavingProject ? 'Đang lưu...' : 'Lưu thay đổi'}
+                </button>
+              </div>
+            </form>
+          ) : (
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                  {project.name}
+                </h1>
+                {isOwner && (
+                  <button 
+                    onClick={() => setIsEditingProject(true)}
+                    className="text-gray-400 hover:text-red-600 transition-colors"
+                    title="Chỉnh sửa dự án"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+              <p className="text-gray-600 dark:text-gray-300">
+                {project.description}
+              </p>
+            </div>
+          )}
+          <span className={`px-3 py-1 rounded-full text-sm font-semibold whitespace-nowrap ml-4 ${
             project.myRole === 'OWNER'
               ? 'bg-red-600 text-white shadow-sm'
               : 'bg-red-50 text-red-600 border border-red-100 dark:bg-red-900/30 dark:border-red-800 dark:text-red-300'
@@ -311,12 +396,6 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
                 </button>
               )}
             </div>
-
-            {errorMsg && (
-              <div className="mb-4 bg-red-50 text-red-600 px-3 py-2 rounded-md text-sm">
-                {errorMsg}
-              </div>
-            )}
 
             {showAddMember && isOwner && (
               <form onSubmit={handleAddMember} className="mb-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
