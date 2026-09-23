@@ -47,12 +47,9 @@ public class MinioService {
         );
     }
 
-    @Value("${minio.url}")
-    private String minioUrl;
-
     // 3. Hàm tạo link Download/View tạm thời (Presigned URL - Tồn tại trong 1 giờ)
     public String getPresignedUrl(String fileKey) throws Exception {
-        String presigned = minioClient.getPresignedObjectUrl(
+        return minioClient.getPresignedObjectUrl(
                 GetPresignedObjectUrlArgs.builder()
                         .method(Method.GET)
                         .bucket(bucketName)
@@ -60,18 +57,6 @@ public class MinioService {
                         .expiry(1, TimeUnit.HOURS)
                         .build()
         );
-        
-        // Fix for Supabase S3: MinioClient strips the path, so we must inject it back for Presigned URLs
-        java.net.URL parsed = new java.net.URL(minioUrl);
-        String basePath = parsed.getPath();
-        if (basePath != null && !basePath.isEmpty() && !basePath.equals("/")) {
-            String hostUrl = parsed.getProtocol() + "://" + parsed.getHost() + (parsed.getPort() == -1 ? "" : ":" + parsed.getPort());
-            if (presigned.startsWith(hostUrl) && !presigned.startsWith(hostUrl + basePath)) {
-                presigned = presigned.replaceFirst(hostUrl, hostUrl + basePath);
-            }
-        }
-        
-        return presigned;
     }
 
     // 4. Hàm Xóa File khỏi MinIO
