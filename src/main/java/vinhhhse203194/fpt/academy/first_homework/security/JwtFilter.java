@@ -25,27 +25,45 @@ public class JwtFilter extends OncePerRequestFilter {
     private CustomUserDetailsService userDetailsService;
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return "OPTIONS".equalsIgnoreCase(request.getMethod());
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         try {
             // Bước 1: Lấy token từ header của request
             String jwt = parseJwt(request);
+            System.out.println("[JwtFilter] Method: " + request.getMethod() + ", URI: " + request.getRequestURI());
+            System.out.println("[JwtFilter] Authorization header: " + request.getHeader("Authorization"));
+            System.out.println("[JwtFilter] Parsed JWT: " + jwt);
 
             // Bước 2: Nếu có thẻ và máy quét báo thẻ xịn (hợp lệ)
-            if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
-                // Đọc email in trên thẻ
-                String email = jwtUtils.getEmailFromJwtToken(jwt);
-
-                // Nhờ phòng nhân sự lấy hồ sơ lên
-                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-
-                // Duyệt cho qua: Cấp quyền truy cập cho user này
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                // Báo cho hệ thống biết "Người này hợp pháp!"
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+            if (jwt != null) {
+                boolean isValid = jwtUtils.validateJwtToken(jwt);
+                System.out.println("[JwtFilter] JWT isValid: " + isValid);
+                
+                if (isValid) {
+                    // Đọc email in trên thẻ
+                    String email = jwtUtils.getEmailFromJwtToken(jwt);
+    
+                    // Nhờ phòng nhân sự lấy hồ sơ lên
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+    
+                    // Duyệt cho qua: Cấp quyền truy cập cho user này
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities());
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+    
+                    // Báo cho hệ thống biết "Người này hợp pháp!"
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    System.out.println("[JwtFilter] Authentication set successfully for: " + email);
+                } else {
+                    System.out.println("[JwtFilter] Invalid JWT token");
+                }
+            } else {
+                System.out.println("[JwtFilter] No JWT token found in request");
             }
         } catch (Exception e) {
             System.err.println("Không thể thiết lập xác thực người dùng: " + e.getMessage());

@@ -12,6 +12,7 @@ import { Document } from '@/types/document.types';
 import { User } from '@/types/auth.types';
 import { use } from 'react';
 import toast from 'react-hot-toast';
+import ChatBot from '@/components/ChatBot';
 
 const STATUS_COLORS: Record<ProjectStatus, string> = {
   PLANNED: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200',
@@ -567,6 +568,8 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
           </div>
         </div>
       </div>
+      {/* AI Chatbot */}
+      <ChatBot projectId={projectId} />
     </div>
   );
 }

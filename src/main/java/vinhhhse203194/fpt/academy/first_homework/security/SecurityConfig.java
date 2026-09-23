@@ -55,8 +55,9 @@ public class SecurityConfig {
             .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint)) // Tuỳ biến lỗi 401
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Không lưu phiên đăng nhập (Stateless)
             .authorizeHttpRequests(auth -> 
-                auth.dispatcherTypeMatchers(jakarta.servlet.DispatcherType.FORWARD, jakarta.servlet.DispatcherType.ERROR).permitAll()
+                auth.dispatcherTypeMatchers(jakarta.servlet.DispatcherType.FORWARD, jakarta.servlet.DispatcherType.ERROR, jakarta.servlet.DispatcherType.ASYNC).permitAll()
                     .requestMatchers("/", "/api/auth/**", "/error").permitAll() // LUẬT 1: Đường này (/api/auth) là để Đăng nhập/Đăng ký nên THẢ CỬA. "/error" để hiển thị lỗi gốc.
+                    .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll() // LUẬT 3: Cho phép tất cả các request OPTIONS (CORS preflight) đi qua
                     .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll() // Mở cửa cho Swagger
                     .anyRequest().authenticated() // LUẬT 2: Toàn bộ các đường khác bắt buộc phải TRÌNH THẺ
             );
