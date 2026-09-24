@@ -4,7 +4,6 @@ import io.minio.*;
 import io.minio.http.Method;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -12,7 +11,6 @@ import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
 @Service
-@ConditionalOnProperty(name="storage.type", havingValue="minio", matchIfMissing=true)
 public class MinioService implements StorageService {
 
     @Autowired

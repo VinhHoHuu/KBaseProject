@@ -12,18 +12,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-@Service
-@ConditionalOnProperty(name="storage.type", havingValue="cloudinary")
 public class CloudinaryService implements StorageService {
 
-    @Value("${cloudinary.url}")
     private String cloudinaryUrl;
 
     private Cloudinary cloudinary;
 
-    @PostConstruct
-    public void init() {
-        cloudinary = new Cloudinary(cloudinaryUrl);
+    public CloudinaryService(String cloudinaryUrl) {
+        this.cloudinaryUrl = cloudinaryUrl;
+        this.cloudinary = new Cloudinary(cloudinaryUrl);
     }
 
     private String getResourceType(String fileKey) {
