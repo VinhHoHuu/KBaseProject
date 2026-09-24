@@ -11,11 +11,12 @@ export const DocumentService = {
     const formData = new FormData();
     formData.append('file', file);
     
-    // API instances need specific Content-Type for FormData
+    // Khi gửi FormData, ta phải ghi đè Content-Type mặc định (application/json) thành undefined.
+    // Việc này giúp trình duyệt tự động sinh ra Content-Type: multipart/form-data kèm theo mã boundary chính xác.
     const response = await api.post(`/projects/${projectId}/documents`, formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+        'Content-Type': undefined
+      }
     });
     return response.data;
   },

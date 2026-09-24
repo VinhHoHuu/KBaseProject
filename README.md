@@ -62,6 +62,10 @@ Hệ thống hiện đang được **Deploy Live** với luồng CI/CD tự đ�
   3. Chọn bucket **`kbase-files`** -> Mở tab **Object Browser**. Bạn sẽ thấy file vật lý được lưu trữ ở đây.
   4. Thông tin file (tên gốc, size, người up) được lưu đồng thời trong bảng `documents` của PostgreSQL.
 
+### ⚠️ 5. Vấn đề Đã biết (Known Issues)
+- **Upload file trên môi trường Production (Render/Vercel):** Hiện tại đang bị lỗi không upload được tài liệu. (Lưu ý: Trước khi tích hợp AI thì tính năng upload trên Vercel vẫn hoạt động bình thường).
+- **Môi trường Localhost:** Tính năng Upload file hoạt động trơn tru (kết nối với Local MinIO) và đã tích hợp thành công AI Chat.
+
 ---
 
 ## 🚀 Hướng dẫn cài đặt (Getting Started)
