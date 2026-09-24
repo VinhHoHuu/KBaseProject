@@ -1,7 +1,7 @@
 package vinhhhse203194.fpt.academy.first_homework.service;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.S3Object;
+import io.minio.GetObjectArgs;
+import io.minio.MinioClient;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
@@ -31,7 +31,7 @@ import java.nio.charset.StandardCharsets;
 public class DocumentTextExtractor {
 
     @Autowired
-    private AmazonS3 amazonS3;
+    private MinioClient minioClient;
 
     @Value("${minio.bucket.name}")
     private String bucketName;
@@ -44,9 +44,13 @@ public class DocumentTextExtractor {
      */
     public String extractText(String fileKey, String contentType) {
         try {
-            // Download file từ S3/Supabase
-            S3Object s3Object = amazonS3.getObject(bucketName, fileKey);
-            InputStream inputStream = s3Object.getObjectContent();
+            // Download file từ MinIO
+            InputStream inputStream = minioClient.getObject(
+                    GetObjectArgs.builder()
+                            .bucket(bucketName)
+                            .object(fileKey)
+                            .build()
+            );
 
             String extension = fileKey.substring(fileKey.lastIndexOf(".") + 1).toLowerCase();
 

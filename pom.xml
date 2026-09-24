@@ -107,11 +107,11 @@
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>2.5.0</version>
         </dependency>
-		<!-- AWS SDK S3 for Document Storage -->
+		<!-- MinIO SDK for Document Storage -->
 		<dependency>
-			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-java-sdk-s3</artifactId>
-			<version>1.12.700</version>
+			<groupId>io.minio</groupId>
+			<artifactId>minio</artifactId>
+			<version>8.5.10</version>
 		</dependency>
 
 		<!-- AI Integration Dependencies -->

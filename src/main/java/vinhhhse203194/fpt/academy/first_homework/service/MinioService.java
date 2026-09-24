@@ -1,31 +1,30 @@
 package vinhhhse203194.fpt.academy.first_homework.service;
 
-import com.amazonaws.HttpMethod;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import io.minio.*;
+import io.minio.http.Method;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
-import java.net.URL;
-import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class MinioService {
 
     @Autowired
-    private AmazonS3 amazonS3;
+    private MinioClient minioClient;
 
+    // Lấy tên bucket từ application.properties
     @Value("${minio.bucket.name}")
     private String bucketName;
 
+    // 1. Hàm tạo Bucket nếu chưa có (Có thể gọi hàm này mỗi lần khởi động hoặc khi upload)
     public void createBucketIfNotExist() throws Exception {
-        if (!amazonS3.doesBucketExistV2(bucketName)) {
-            amazonS3.createBucket(bucketName);
+        boolean found = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
+        if (!found) {
+            minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
         }
     }
 
@@ -34,33 +33,39 @@ public class MinioService {
     public void uploadFile(String fileKey, MultipartFile file) throws Exception {
         createBucketIfNotExist(); // Đảm bảo bucket đã tồn tại
         
+        // Mở luồng đọc dữ liệu từ file
         InputStream inputStream = file.getInputStream();
-        ObjectMetadata metadata = new ObjectMetadata();
-        metadata.setContentType(file.getContentType());
-        metadata.setContentLength(file.getSize());
         
-        amazonS3.putObject(new PutObjectRequest(bucketName, fileKey, inputStream, metadata));
+        // Gọi lệnh putObject để đẩy lên MinIO
+        minioClient.putObject(
+                PutObjectArgs.builder()
+                        .bucket(bucketName)
+                        .object(fileKey)
+                        .stream(inputStream, file.getSize(), -1)
+                        .contentType(file.getContentType()) // Lưu định dạng file
+                        .build()
+        );
     }
 
     // 3. Hàm tạo link Download/View tạm thời (Presigned URL - Tồn tại trong 1 giờ)
     public String getPresignedUrl(String fileKey) throws Exception {
-        // Thời gian hết hạn là 1 giờ (1000 * 60 * 60 = 3600000 ms)
-        Date expiration = new Date();
-        long expTimeMillis = expiration.getTime();
-        expTimeMillis += 1000 * 60 * 60;
-        expiration.setTime(expTimeMillis);
-        
-        GeneratePresignedUrlRequest generatePresignedUrlRequest = 
-                new GeneratePresignedUrlRequest(bucketName, fileKey)
-                        .withMethod(HttpMethod.GET)
-                        .withExpiration(expiration);
-        
-        URL url = amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
-        return url.toString();
+        return minioClient.getPresignedObjectUrl(
+                GetPresignedObjectUrlArgs.builder()
+                        .method(Method.GET)
+                        .bucket(bucketName)
+                        .object(fileKey)
+                        .expiry(1, TimeUnit.HOURS)
+                        .build()
+        );
     }
 
     // 4. Hàm Xóa File khỏi MinIO
     public void deleteFile(String fileKey) throws Exception {
-        amazonS3.deleteObject(bucketName, fileKey);
+        minioClient.removeObject(
+                RemoveObjectArgs.builder()
+                        .bucket(bucketName)
+                        .object(fileKey)
+                        .build()
+        );
     }
 }
