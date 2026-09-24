@@ -248,7 +248,7 @@ public class ProjectService {
 
 
     ///+++SUPPORTIVE METHOD
-    private ProjectResponse mapProjectToResponse(Project project, String role){
+    public ProjectResponse mapProjectToResponse(Project project, String role){
         ProjectResponse response = new ProjectResponse();
         response.setId(project.getId());
         response.setName(project.getName());

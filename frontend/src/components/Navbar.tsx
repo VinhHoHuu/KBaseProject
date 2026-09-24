@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { AuthService } from '@/services/auth.service';
 import { User } from '@/types/auth.types';
 import Image from 'next/image';
+import GlobalSearch from './GlobalSearch';
 
 export default function Navbar() {
   const router = useRouter();
@@ -55,7 +56,9 @@ export default function Navbar() {
                 <Link href="/" className="border-red-500 text-gray-900 dark:text-white inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                   Dashboard
                 </Link>
-                {/* Additional nav links can go here */}
+                <div className="flex items-center ml-4">
+                  <GlobalSearch />
+                </div>
               </div>
             )}
           </div>
