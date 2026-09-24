@@ -27,29 +27,21 @@ public class DocumentController {
     public ResponseEntity<?> uploadDocument(
             @PathVariable Long projectId,
             @RequestParam("file") MultipartFile file,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) throws Exception {
         
-        try {
-            User currentUser = userDetails.getUser();
-            DocumentResponse response = documentService.uploadDocument(file, projectId, currentUser);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+        User currentUser = userDetails.getUser();
+        DocumentResponse response = documentService.uploadDocument(file, projectId, currentUser);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping
     @Operation(summary = "Lấy danh sách File", description = "Xem tất cả các file đã upload trong dự án.")
     public ResponseEntity<?> getAllDocuments(
             @PathVariable Long projectId,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) throws Exception {
             
-        try {
-            User currentUser = userDetails.getUser();
-            return ResponseEntity.ok(documentService.getAllDocuments(projectId, currentUser));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+        User currentUser = userDetails.getUser();
+        return ResponseEntity.ok(documentService.getAllDocuments(projectId, currentUser));
     }
 
     @DeleteMapping("/{documentId}")
@@ -57,14 +49,10 @@ public class DocumentController {
     public ResponseEntity<?> deleteDocument(
             @PathVariable Long projectId,
             @PathVariable Long documentId,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) throws Exception {
             
-        try {
-            User currentUser = userDetails.getUser();
-            documentService.deleteDocument(projectId, currentUser, documentId);
-            return ResponseEntity.ok("Xóa file thành công!");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+        User currentUser = userDetails.getUser();
+        documentService.deleteDocument(projectId, currentUser, documentId);
+        return ResponseEntity.ok(java.util.Map.of("message", "Xóa file thành công!"));
     }
 }
