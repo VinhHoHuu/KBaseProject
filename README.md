@@ -1,7 +1,7 @@
 <div align="center">
   <h1>🚀 KBase - Project Management API</h1>
   <p>
-    Hệ thống API Quản lý Dự án mạnh mẽ, bảo mật và linh hoạt được xây dựng trên nền tảng <b>Spring Boot 3</b> & <b>Java 21</b>.
+    A powerful, secure, and flexible Project Management API system built on <b>Spring Boot 3</b> & <b>Java 21</b>.
   </p>
   <p>
     <img src="https://img.shields.io/badge/Java-21-orange?style=for-the-badge&logo=java" alt="Java 21">
@@ -18,138 +18,138 @@
 
 ---
 
-## 🌟 Giới thiệu (Introduction)
-**KBase** là một hệ thống Backend API (tương tự Jira/Trello thu nhỏ) cung cấp các giải pháp quản lý dự án dành cho nhóm làm việc. Dự án tập trung vào tính năng bảo mật với hệ thống xác thực JWT, phân quyền thao tác người dùng, và tối ưu hóa hiệu suất với Hibernate/JPA. 
-Hệ thống hiện đang được **Deploy Live** với luồng CI/CD tự động thông qua GitHub Actions và Docker.
+## 🌟 Introduction
+**KBase** is a Backend API system (similar to a mini Jira/Trello) providing project management solutions for teams. The project focuses on security with a JWT authentication system, user role authorization, and performance optimization with Hibernate/JPA. 
+The system is currently **Deployed Live** with an automated CI/CD pipeline via GitHub Actions and Docker.
 
-- 🌐 **Giao diện chính thức (Vercel):** **[https://k-base-project.vercel.app](https://k-base-project.vercel.app)**
+- 🌐 **Official Frontend (Vercel):** **[https://k-base-project.vercel.app](https://k-base-project.vercel.app)**
 - 🚀 **Backend API (Render):** **[https://kbaseproject.onrender.com/](https://kbaseproject.onrender.com/)**
 - 🟢 **Swagger UI API Docs:** **[https://kbaseproject.onrender.com/swagger-ui/index.html](https://kbaseproject.onrender.com/swagger-ui/index.html)**
 
 ---
 
-## ⚙️ Tính năng & Kiến trúc nổi bật (Features & Architecture)
+## ⚙️ Features & Architecture
 
-### ⚛️ 1. Giao diện Người dùng Hiện đại (Frontend Architecture)
-- Phát triển bằng **Next.js 14** (App Router) kết hợp **TypeScript**.
-- Thiết kế UI sắc nét, Responsive với **Tailwind CSS**.
-- **Axios Interceptors:** Xử lý tự động đính kèm chuỗi xác thực JWT vào mọi request, và tự động điều hướng (Redirect) về trang Đăng nhập khi Token hết hạn (Lỗi 401).
-- Kiến trúc phân chia rõ ràng: `components/` (Giao diện), `services/` (Tích hợp API) và `types/` (Định dạng dữ liệu).
+### ⚛️ 1. Modern User Interface (Frontend Architecture)
+- Developed using **Next.js 14** (App Router) combined with **TypeScript**.
+- Crisp, Responsive UI design with **Tailwind CSS**.
+- **Axios Interceptors:** Automatically attaches JWT authentication strings to every request, and automatically redirects to the Login page when the Token expires (401 Error).
+- Clear architectural separation: `components/` (UI), `services/` (API Integration), and `types/` (Data Models).
 
-### 🔐 2. Quản lý Xác thực & Bảo mật (Backend Authentication)
-- **Đăng ký / Đăng nhập** tài khoản.
-- Mã hóa mật khẩu an toàn với **Bcrypt**.
-- Cấp phát và xác thực bằng thẻ **JSON Web Token (JWT)**.
-- Xử lý lỗi 401 Unauthorized chuyên nghiệp bằng chuẩn JSON.
+### 🔐 2. Authentication & Security (Backend Authentication)
+- Account **Registration / Login**.
+- Secure password hashing with **Bcrypt**.
+- Issue and verify using **JSON Web Tokens (JWT)**.
+- Professional 401 Unauthorized error handling using JSON standard.
 
-### 🗂️ 2. Quản lý Dự án (Project Management)
-- Thiết kế API chuẩn **RESTful** (GET, POST, PUT, DELETE).
-- Người dùng có thể tạo dự án mới (tự động trở thành `OWNER`).
-- Chỉ `OWNER` mới có quyền Chỉnh sửa hoặc Xóa dự án.
-- Xem danh sách các dự án đang tham gia.
+### 🗂️ 3. Project Management
+- **RESTful** standard API design (GET, POST, PUT, DELETE).
+- Users can create new projects (automatically becoming `OWNER`).
+- Only `OWNER` has the permission to Edit or Delete projects.
+- View the list of participating projects.
 
-### 👥 3. Quản lý Thành viên (Member Management)
-- **Mời thành viên mới** vào dự án bằng Email.
-- **Xem danh sách thành viên** của dự án (yêu cầu là thành viên).
-- **Trục xuất thành viên** (chỉ dành cho `OWNER` hoặc `ADMIN`).
+### 👥 4. Member Management
+- **Invite new members** to the project via Email.
+- **View the list of members** of a project (requires being a member).
+- **Remove members** (only for `OWNER` or `ADMIN`).
 
-### 📂 4. Quản lý Tài liệu & Lưu trữ (Document Storage)
-- Tích hợp hệ thống lưu trữ đối tượng **MinIO** (chuẩn S3).
-- **Trang quản trị MinIO:** `http://localhost:9001` (Tài khoản: `minioadmin` / `minioadmin`)
-- **Cách kiểm tra file sau khi Upload:** 
-  1. Đăng nhập vào trang quản trị MinIO.
-  2. Chọn mục **Buckets** bên menu trái.
-  3. Chọn bucket **`kbase-files`** -> Mở tab **Object Browser**. Bạn sẽ thấy file vật lý được lưu trữ ở đây.
-  4. Thông tin file (tên gốc, size, người up) được lưu đồng thời trong bảng `documents` của PostgreSQL.
+### 📂 5. Document Management & Storage
+- Integrated **MinIO** object storage system (S3 standard).
+- **MinIO Admin Console:** `http://localhost:9001` (Credentials: `minioadmin` / `minioadmin`)
+- **How to verify files after Upload:** 
+  1. Log in to the MinIO admin console.
+  2. Select **Buckets** from the left menu.
+  3. Select the **`kbase-files`** bucket -> Open the **Object Browser** tab. You will see the physical files stored here.
+  4. File information (original name, size, uploader) is simultaneously stored in the `documents` table of PostgreSQL.
 
-### ⚠️ 5. Vấn đề Đã biết (Known Issues)
-- **Upload file trên môi trường Production (Render/Vercel):** Hiện tại đang bị lỗi không upload được tài liệu. (Lưu ý: Trước khi tích hợp AI thì tính năng upload trên Vercel vẫn hoạt động bình thường).
-- **Môi trường Localhost:** Tính năng Upload file hoạt động trơn tru (kết nối với Local MinIO) và đã tích hợp thành công AI Chat.
+### ⚠️ 6. Known Issues
+- **File upload in Production environment (Render/Vercel):** Currently facing an issue where documents cannot be uploaded. (Note: Before integrating AI, the upload feature on Vercel worked normally).
+- **Localhost environment:** The file upload feature works smoothly (connected to Local MinIO) and AI Chat has been successfully integrated.
 
 ---
 
-## 🚀 Hướng dẫn cài đặt (Getting Started)
+## 🚀 Getting Started
 
-### Yêu cầu hệ thống (Prerequisites)
+### Prerequisites
 - **Java 21** (JDK 21)
 - **Maven** 3.8+
-- **Docker & Docker Compose** (Để chạy PostgreSQL và MinIO)
+- **Docker & Docker Compose** (To run PostgreSQL and MinIO)
 
-### Các bước cài đặt (Installation)
-1. **Clone dự án:**
+### Installation
+1. **Clone the repository:**
    ```bash
    git clone https://github.com/VinhHoHuu/KBaseProject.git
    cd KBaseProject
    ```
 
-2. **Khởi động Database và MinIO:**
-   Cài đặt Docker Desktop và chạy lệnh sau để khởi động PostgreSQL & MinIO:
+2. **Start Database and MinIO:**
+   Install Docker Desktop and run the following command to start PostgreSQL & MinIO:
    ```bash
    docker-compose up -d
    ```
 
-3. **Chạy ứng dụng Spring Boot:**
+3. **Run the Spring Boot application:**
    ```bash
    mvn spring-boot:run
    ```
-   *Server sẽ chạy ở địa chỉ `http://localhost:8080`*
+   *The server will run at `http://localhost:8080`*
 
 ---
 
-## 📖 Tài liệu API (API Documentation)
-Dự án được tích hợp sẵn **Swagger UI** (OpenAPI 3.0) với giao diện trực quan và tính năng test trực tiếp qua nút `Authorize`.
+## 📖 API Documentation
+The project has built-in **Swagger UI** (OpenAPI 3.0) with an intuitive interface and direct testing capabilities via the `Authorize` button.
 
-- 🚀 **Trang chủ API (Render):** **[https://kbaseproject.onrender.com/](https://kbaseproject.onrender.com/)**
+- 🚀 **API Homepage (Render):** **[https://kbaseproject.onrender.com/](https://kbaseproject.onrender.com/)**
 - 🟢 **Swagger UI (Render):** **[https://kbaseproject.onrender.com/swagger-ui/index.html](https://kbaseproject.onrender.com/swagger-ui/index.html)**
 - 💻 **Localhost:** **[http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)**
 
 ---
 
-## 🛠️ Luồng tự động hóa (CI/CD)
-Dự án đã được thiết lập sẵn **GitHub Actions (CI)**:
-- Mỗi khi có code mới được Push hoặc Pull Request vào nhánh `main`.
-- Hệ thống tự động khởi tạo Container **PostgreSQL 15**.
-- Cài đặt JDK 21 và tự động chạy `mvn clean package` để Build & Run Unit Test, đảm bảo độ ổn định của hệ thống 100%.
+## 🛠️ CI/CD Pipeline
+The project is set up with **GitHub Actions (CI)**:
+- Triggered whenever new code is Pushed or Pull Requested to the `main` branch.
+- The system automatically initializes a **PostgreSQL 15** container.
+- Installs JDK 21 and automatically runs `mvn clean package` to Build & Run Unit Tests, ensuring 100% system stability.
 
 ---
 
-## 🚀 Hướng dẫn Deployment (CI/CD)
+## 🚀 Deployment Guide (CI/CD)
 
-Dự án hỗ trợ sẵn **Docker** giúp bạn dễ dàng deploy lên bất kỳ nền tảng Cloud nào hỗ trợ Container (như Render, AWS, DigitalOcean).
+The project includes **Docker** support, making it easy to deploy on any Cloud platform that supports Containers (such as Render, AWS, DigitalOcean).
 
-### 1. Triển khai bằng Docker Compose (Local/VPS)
-Môi trường `docker-compose.yml` đã định nghĩa sẵn 3 dịch vụ: `postgres`, `minio` và `backend`. Chỉ cần một câu lệnh để chạy toàn bộ hệ thống:
+### 1. Deploy using Docker Compose (Local/VPS)
+The `docker-compose.yml` environment pre-defines 3 services: `postgres`, `minio`, and `backend`. Just one command to run the entire system:
 ```bash
 docker-compose up -d --build
 ```
-Hệ thống sẽ tự động build image cho Spring Boot và kết nối với các service Database/Storage.
+The system will automatically build the image for Spring Boot and connect to the Database/Storage services.
 
-### 2. Triển khai Backend lên Render.com (Web Service)
-1. Đăng nhập vào Render, chọn tạo mới **Web Service**.
-2. Kết nối với Repository Github của bạn.
-3. Trong phần cấu hình, chọn môi trường **Docker**. Render sẽ tự động đọc `Dockerfile` trong source code để build.
-4. Thêm các biến môi trường (Environment Variables) cần thiết cho Server:
-   - `SPRING_DATASOURCE_URL` (URL kết nối DB)
+### 2. Deploy Backend to Render.com (Web Service)
+1. Log in to Render, choose to create a new **Web Service**.
+2. Connect to your Github Repository.
+3. In the configuration section, choose the **Docker** environment. Render will automatically read the `Dockerfile` in the source code to build.
+4. Add the necessary Environment Variables for the Server:
+   - `SPRING_DATASOURCE_URL` (DB connection URL)
    - `SPRING_DATASOURCE_USERNAME`
    - `SPRING_DATASOURCE_PASSWORD`
-   - `MINIO_URL` (URL tới MinIO server của bạn)
+   - `MINIO_URL` (URL to your MinIO server)
    - `MINIO_ACCESS_KEY` & `MINIO_SECRET_KEY`
 
-### 3. Triển khai Frontend lên Vercel
-1. Đăng nhập vào **Vercel** bằng tài khoản GitHub.
-2. Chọn **Add New -> Project** và Import repository `KBaseProject`.
-3. Trong cấu hình dự án, đổi `Root Directory` thành thư mục `frontend`.
-4. Thêm biến môi trường:
-   - `NEXT_PUBLIC_API_URL` = `https://kbaseproject.onrender.com/api` (URL của Backend API)
-5. Bấm **Deploy**. Vercel sẽ tự động build Next.js và cập nhật mỗi khi có code mới đẩy lên nhánh `main`.
+### 3. Deploy Frontend to Vercel
+1. Log in to **Vercel** with your GitHub account.
+2. Select **Add New -> Project** and Import the `KBaseProject` repository.
+3. In the project configuration, change the `Root Directory` to the `frontend` folder.
+4. Add environment variables:
+   - `NEXT_PUBLIC_API_URL` = `https://kbaseproject.onrender.com/api` (Backend API URL)
+5. Click **Deploy**. Vercel will automatically build Next.js and update whenever new code is pushed to the `main` branch.
 
 ---
 
-## 🤖 Hỗ trợ bởi Trí tuệ Nhân tạo (AI-Assisted Development)
-Dự án này được phát triển với sự đồng hành của **Trợ lý lập trình AI (Antigravity AI)**. Quá trình phát triển áp dụng mô hình "Pair Programming" giữa kỹ sư phần mềm và AI nhằm:
-- **Tối ưu hóa kiến trúc:** Xây dựng hệ thống clean code, tối ưu hóa các câu truy vấn JPA/Hibernate và thiết lập luồng xác thực bảo mật JWT chặt chẽ.
-- **Tích hợp công nghệ hiện đại:** Hỗ trợ cài đặt nhanh chóng MinIO SDK, Docker Compose và GitHub Actions CI/CD.
-- **Xử lý sự cố (Troubleshooting):** Tự động hóa quá trình debug, phát hiện lỗi xung đột thư viện và đưa ra giải pháp khắc phục triệt để.
+## 🤖 AI-Assisted Development
+This project was developed with the companionship of the **AI Programming Assistant (Antigravity AI)**. The development process applies a "Pair Programming" model between the software engineer and AI to:
+- **Optimize architecture:** Build a clean code system, optimize JPA/Hibernate queries, and establish a strict JWT security authentication flow.
+- **Integrate modern technologies:** Support quick setup of MinIO SDK, Docker Compose, and GitHub Actions CI/CD.
+- **Troubleshooting:** Automate the debugging process, detect library conflicts, and provide comprehensive solutions.
 
 ---
-*Phát triển bởi [VinhHoHuu](https://github.com/VinhHoHuu) & Antigravity AI.*
+*Developed by [VinhHoHuu](https://github.com/VinhHoHuu) & Antigravity AI.*
