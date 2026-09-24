@@ -128,14 +128,7 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
     // Validations
     if (editProjectStartDate) {
       const start = new Date(editProjectStartDate);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      
-      if (start < today) {
-        toast.error('Start date cannot be in the past!');
-        return;
-      }
-      
+
       if (editProjectEndDate) {
         const end = new Date(editProjectEndDate);
         if (start > end) {
