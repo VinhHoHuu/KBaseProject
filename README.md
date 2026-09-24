@@ -10,6 +10,7 @@
     <img src="https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=for-the-badge&logo=tailwind-css" alt="Tailwind CSS">
     <img src="https://img.shields.io/badge/PostgreSQL-15-blue?style=for-the-badge&logo=postgresql" alt="PostgreSQL">
     <img src="https://img.shields.io/badge/MinIO-S3_Storage-red?style=for-the-badge&logo=minio" alt="MinIO">
+    <img src="https://img.shields.io/badge/Cloudinary-Cloud_Storage-3448C5?style=for-the-badge&logo=cloudinary" alt="Cloudinary">
     <img src="https://img.shields.io/badge/Security-JWT-red?style=for-the-badge&logo=springsecurity" alt="JWT Security">
     <img src="https://img.shields.io/badge/CI/CD-GitHub_Actions-black?style=for-the-badge&logo=githubactions" alt="GitHub Actions">
     <img src="https://img.shields.io/badge/Deployment-Render-purple?style=for-the-badge&logo=render" alt="Render">
@@ -54,17 +55,14 @@ The system is currently **Deployed Live** with an automated CI/CD pipeline via G
 - **Remove members** (only for `OWNER` or `ADMIN`).
 
 ### 📂 5. Document Management & Storage
-- Integrated **MinIO** object storage system (S3 standard).
-- **MinIO Admin Console:** `http://localhost:9001` (Credentials: `minioadmin` / `minioadmin`)
-- **How to verify files after Upload:** 
+- Integrated **MinIO** (Local Development) and **Cloudinary** (Production) for seamless object storage.
+- **MinIO Admin Console (Local):** `http://localhost:9001` (Credentials: `minioadmin` / `minioadmin`)
+- **Cloudinary:** Fully configured for Production via environment variables to ensure zero data-loss on PaaS deployments like Render.
+- **How to verify files after Upload (Local):** 
   1. Log in to the MinIO admin console.
   2. Select **Buckets** from the left menu.
   3. Select the **`kbase-files`** bucket -> Open the **Object Browser** tab. You will see the physical files stored here.
   4. File information (original name, size, uploader) is simultaneously stored in the `documents` table of PostgreSQL.
-
-### ⚠️ 6. Known Issues
-- **File upload in Production environment (Render/Vercel):** Currently facing an issue where documents cannot be uploaded. (Note: Before integrating AI, the upload feature on Vercel worked normally).
-- **Localhost environment:** The file upload feature works smoothly (connected to Local MinIO) and AI Chat has been successfully integrated.
 
 ---
 
@@ -132,8 +130,8 @@ The system will automatically build the image for Spring Boot and connect to the
    - `SPRING_DATASOURCE_URL` (DB connection URL)
    - `SPRING_DATASOURCE_USERNAME`
    - `SPRING_DATASOURCE_PASSWORD`
-   - `MINIO_URL` (URL to your MinIO server)
-   - `MINIO_ACCESS_KEY` & `MINIO_SECRET_KEY`
+   - `STORAGE_TYPE` = `cloudinary` (To enable Cloudinary for production)
+   - `CLOUDINARY_URL` (Your Cloudinary API URL)
 
 ### 3. Deploy Frontend to Vercel
 1. Log in to **Vercel** with your GitHub account.
