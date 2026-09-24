@@ -12,7 +12,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import java.io.InputStream;
+import java.net.URL;
+
 public class CloudinaryService implements StorageService {
+
 
     private String cloudinaryUrl;
 
@@ -56,5 +60,12 @@ public class CloudinaryService implements StorageService {
     public void deleteFile(String fileKey) throws Exception {
         String resourceType = getResourceType(fileKey);
         cloudinary.uploader().destroy(fileKey, ObjectUtils.asMap("resource_type", resourceType));
+    }
+
+    @Override
+    public InputStream getFileStream(String fileKey) throws Exception {
+        String urlString = getPresignedUrl(fileKey);
+        URL url = new URL(urlString);
+        return url.openStream();
     }
 }

@@ -68,4 +68,14 @@ public class MinioService implements StorageService {
                         .build()
         );
     }
+
+    @Override
+    public InputStream getFileStream(String fileKey) throws Exception {
+        return minioClient.getObject(
+                GetObjectArgs.builder()
+                        .bucket(bucketName)
+                        .object(fileKey)
+                        .build()
+        );
+    }
 }

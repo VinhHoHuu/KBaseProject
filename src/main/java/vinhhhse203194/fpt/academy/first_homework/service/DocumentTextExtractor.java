@@ -1,7 +1,6 @@
 package vinhhhse203194.fpt.academy.first_homework.service;
 
-import io.minio.GetObjectArgs;
-import io.minio.MinioClient;
+
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
@@ -31,10 +30,7 @@ import java.nio.charset.StandardCharsets;
 public class DocumentTextExtractor {
 
     @Autowired
-    private MinioClient minioClient;
-
-    @Value("${minio.bucket.name}")
-    private String bucketName;
+    private StorageService storageService;
 
     /**
      * Trích xuất text từ file dựa trên fileKey và loại file.
@@ -44,13 +40,8 @@ public class DocumentTextExtractor {
      */
     public String extractText(String fileKey, String contentType) {
         try {
-            // Download file từ MinIO
-            InputStream inputStream = minioClient.getObject(
-                    GetObjectArgs.builder()
-                            .bucket(bucketName)
-                            .object(fileKey)
-                            .build()
-            );
+            // Download file thông qua StorageService (tương thích cả MinIO & Cloudinary)
+            InputStream inputStream = storageService.getFileStream(fileKey);
 
             String extension = fileKey.substring(fileKey.lastIndexOf(".") + 1).toLowerCase();
 
