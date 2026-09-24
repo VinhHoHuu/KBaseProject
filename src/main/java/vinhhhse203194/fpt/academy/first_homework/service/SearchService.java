@@ -38,7 +38,7 @@ public class SearchService {
     private ProjectService projectService;
     
     @Autowired
-    private MinioService minioService;
+    private StorageService storageService;
 
     public SearchResultResponse searchGlobal(User currentUser, String keyword) {
         SearchResultResponse response = new SearchResultResponse();
@@ -78,7 +78,7 @@ public class SearchService {
         List<Document> matchingDocs = documentRepository.searchDocumentsForUser(currentUser.getId(), searchKey);
         List<DocumentResponse> documentResponses = matchingDocs.stream().map(doc -> {
             try {
-                String presignedUrl = minioService.getPresignedUrl(doc.getFileKey());
+                String presignedUrl = storageService.getPresignedUrl(doc.getFileKey());
                 return new DocumentResponse(doc, presignedUrl);
             } catch (Exception e) {
                 return new DocumentResponse(doc, null);

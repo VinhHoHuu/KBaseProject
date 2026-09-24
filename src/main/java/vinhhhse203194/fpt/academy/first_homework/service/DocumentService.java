@@ -15,7 +15,7 @@ import java.util.UUID;
 public class DocumentService {
 
     @Autowired
-    private MinioService minioService;
+    private StorageService storageService;
     
     @Autowired
     private IDocumentRepository documentRepository;
@@ -64,9 +64,9 @@ public class DocumentService {
 
         //Bước 5: Upload file lên MinIO
         try{
-            minioService.uploadFile(fileKey, file);
+            storageService.uploadFile(fileKey, file);
         }catch(Exception e){
-            throw new RuntimeException("Failed to upload file to MinIO: " + e.getMessage());
+            throw new RuntimeException("Failed to upload file: " + e.getMessage());
         }
 
         //Bước 6: Lưu thông tin file vào database
@@ -80,7 +80,7 @@ public class DocumentService {
         documentRepository.save(document);
 
         //Bước 7: Tạo Presigned URL để cho phép client tải file
-        String presignedUrl = minioService.getPresignedUrl(fileKey);
+        String presignedUrl = storageService.getPresignedUrl(fileKey);
 
         //Bước 8: Trả về document response cho client
         return new DocumentResponse(document, presignedUrl);
@@ -108,7 +108,7 @@ public class DocumentService {
         //Bước 4: chuyển đổi từ entity sang DTO và tạo Presigned url mới cho mỗi file
         List<DocumentResponse> responses = new ArrayList<>();
         for(Document doc : documents){
-            String presignedUrl = minioService.getPresignedUrl(doc.getFileKey());
+            String presignedUrl = storageService.getPresignedUrl(doc.getFileKey());
             responses.add(new DocumentResponse(doc, presignedUrl));
         }
 
@@ -142,9 +142,9 @@ public class DocumentService {
 
         //Bước 5: Xóa file khỏi MinIO
         try{
-            minioService.deleteFile(document.getFileKey());
+            storageService.deleteFile(document.getFileKey());
         }catch(Exception e){
-            throw new RuntimeException("Failed to delete file from MinIO: " + e.getMessage());
+            throw new RuntimeException("Failed to delete file: " + e.getMessage());
         }
 
         //Bước 6: Xóa document khỏi database
